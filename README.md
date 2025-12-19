@@ -20,5 +20,6 @@ Production-style platform for ingesting time-series data, modeling it into analy
 - Daily scheduled workflow for ingestion + quality + metrics
 - Optional monthly backfill workflow
 
-## Status
-Stage 0: repository skeleton (folder layout + README).
+## Project Documentation
+- Project spec: [docs/project_spec.md](docs/project_spec.md)
+- Current stage: Stage 1 — Scope & production story
