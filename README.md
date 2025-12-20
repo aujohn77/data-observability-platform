@@ -22,4 +22,5 @@ Production-style platform for ingesting time-series data, modeling it into analy
 
 ## Project Documentation
 - Project spec: [docs/project_spec.md](docs/project_spec.md)
-- Current stage: Stage 1 — Scope & production story
+- Data contracts: [docs/data_contracts.md](docs/data_contracts.md)
+- Current stage: Stage 2 — Data contracts & semantics
