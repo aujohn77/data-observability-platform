@@ -1,10 +1,19 @@
+# Data Observability Platform
+
+Production-style platform for ingesting time-series data, modeling it into analytics-ready tables, and monitoring reliability via data quality checks, operational metrics, and security controls.
+
+
 
 [![security-rls-tests](https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml/badge.svg)](https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml)
 
 
-# Data Observability Platform
+## Security proof
+RLS is enforced in Postgres and verified by CI on every run:
+- **Top-10 RLS checks**: [docs/security.md](docs/security.md)
+- **Test SQL**: `db/tests/security_rls_smoke.sql`
+- **CI workflow**: `.github/workflows/security_rls_tests.yml`
 
-Production-style platform for ingesting time-series data, modeling it into analytics-ready tables, and monitoring reliability via data quality checks, operational metrics, and security controls.
+
 
 ## What it does (planned)
 - Ingest: scheduled jobs pull data from external sources (APIs / feeds)
