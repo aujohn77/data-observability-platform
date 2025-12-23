@@ -1,3 +1,7 @@
+
+[![security-rls-tests](https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml/badge.svg)](https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml)
+
+
 # Data Observability Platform
 
 Production-style platform for ingesting time-series data, modeling it into analytics-ready tables, and monitoring reliability via data quality checks, operational metrics, and security controls.
