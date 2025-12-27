@@ -11,14 +11,14 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 METRICS = {
-    "air_temp_c":     ("temperature_2m",       "C",    "num"),
-    "rel_hum_pct":    ("relative_humidity_2m", "%",    "num"),
-    "press_hpa":      ("surface_pressure",     "hPa",  "num"),
-    "wind_spd_ms":    ("wind_speed_10m",       "m/s",  "num"),
-    "wind_dir_deg":   ("wind_direction_10m",   "deg",  "num"),
-    "gust_ms":        ("wind_gusts_10m",       "m/s",  "num"),
-    "precip_mm":      ("precipitation",        "mm",   "num"),
-    "weather_code":   ("weather_code",         "code", "num"),
+    "temperature_2m":          ("temperature_2m",        "degrees Celsius",     "num"),
+    "relative_humidity_2m":    ("relative_humidity_2m",  "percent",             "num"),
+    "surface_pressure":        ("surface_pressure",      "hectopascals",        "num"),
+    "wind_speed_10m":          ("wind_speed_10m",        "metres per second",   "num"),
+    "wind_direction_10m":      ("wind_direction_10m",    "degrees",             "num"),
+    "wind_gusts_10m":          ("wind_gusts_10m",        "metres per second",   "num"),
+    "precipitation":           ("precipitation",         "millimetres",         "num"),
+    "weather_code":            ("weather_code",          "dimensionless code",  "num"),
 }
 
 def start_job(cur, job_name: str) -> str:
