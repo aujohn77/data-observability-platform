@@ -25,7 +25,7 @@ def _q(sql, params=None, many=True):
     many=True -> fetchall
     many=False -> fetchone
     """
-    conn = psycopg2.connect(_get_db_url())
+    conn = psycopg2.connect(_get_obs_db_url())
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(sql, params or {})
