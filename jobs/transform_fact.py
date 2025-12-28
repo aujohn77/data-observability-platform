@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = os.environ["OBS_DATABASE_URL"]
 
 INGEST_JOB_NAME = "ingest_openmeteo_all_stations"
 TRANSFORM_JOB_NAME = "transform_raw_to_fact"

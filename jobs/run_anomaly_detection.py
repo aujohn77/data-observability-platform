@@ -17,7 +17,7 @@ from jobs.anomaly_detectors import silent_station, stale_data, spike, drop, flat
 
 
 load_dotenv()
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = os.environ["OBS_DATABASE_URL"]
 
 JOB_NAME = "anomaly_detection"
 

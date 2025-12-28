@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = os.environ["OBS_DATABASE_URL"]
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 METRICS = {
