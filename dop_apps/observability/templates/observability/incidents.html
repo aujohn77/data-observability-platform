@@ -1,0 +1,12 @@
+{% extends "observability/base.html" %}
+{% block content %}
+<table class="table">
+  <tr><th>Status</th><th>Opened</th><th>Severity</th><th>Title</th><th>Station</th><th>Metric</th></tr>
+  {% for i in items %}
+  <tr>
+    <td>{{ i.status }}</td><td>{{ i.opened_at }}</td><td>{{ i.severity }}</td>
+    <td>{{ i.title }}</td><td>{{ i.station_id }}</td><td>{{ i.metric_id }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

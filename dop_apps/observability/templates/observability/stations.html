@@ -1,0 +1,9 @@
+{% extends "observability/base.html" %}
+{% block content %}
+<table class="table">
+  <tr><th>ID</th><th>Name</th><th>Freshness</th><th>Last seen</th></tr>
+  {% for s in rows %}
+  <tr><td>{{ s.station_id }}</td><td>{{ s.name }}</td><td>{{ s.freshness }}</td><td>{{ s.last_seen }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

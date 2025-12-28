@@ -1,0 +1,26 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title|default:"Observability" }}</title>
+  <link rel="stylesheet" href="{% static 'observability/observability.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Data Observability</div>
+    <nav class="nav">
+      <a href="/observability/status/">Status</a>
+      <a href="/observability/incidents/">Incidents</a>
+      <a href="/observability/stations/">Stations</a>
+      <a href="/observability/freshness/">Freshness</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>{{ title }}</h1>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
