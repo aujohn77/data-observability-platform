@@ -1,0 +1,510 @@
+{% extends "observability/base.html" %}
+{% block content %}
+
+<section class="card">
+  <div style="display:flex; justify-content:space-between; gap:1em; flex-wrap:wrap;">
+    <div>
+      <strong>DATA OBSERVABILITY PLATFORM — CONTROL TOWER</strong>
+      <button
+        type="button"
+        class="info-btn"
+        id="statusInfoBtn"
+        aria-label="Show status and KPI definitions"
+        aria-haspopup="dialog"
+        aria-controls="statusModal"
+        title="Definitions"
+      >i</button>
+
+      <br> <br>
+
+      Status:
+      <span
+        style="
+          display:inline-block;
+          width:.7em;
+          height:.7em;
+          border-radius:50%;
+          margin:0 .35em 0 .15em;
+          vertical-align:middle;
+          background:
+            {% if status.status == 'GREEN' %}#22c55e
+            {% elif status.status == 'AMBER' %}#f59e0b
+            {% elif status.status == 'RED' %}#ef4444
+            {% else %}#64748b{% endif %};
+        ">
+      </span>
+
+      <strong>{{ status.status|default:"—" }}</strong>
+
+      |
+      Last ingest: <strong>{{ status.last_ingest|default:"—" }}</strong>
+    </div>
+
+  </div>
+</section>
+
+<section class="card">
+  <table style="width:100%;">
+    <tr>
+      <th style="text-align:left;">Freshness</th>
+      <th style="text-align:left;">Ingest Success (last 24h)</th>      
+      <th style="text-align:left;">Data Quality (last 24h)</th>
+      <th style="text-align:left;">Open</th>
+    </tr>
+    <tr>
+      <td>
+        Worst: <strong>{{ kpis.freshness_worst|default:"—" }} min</strong>
+      </td>
+      <td>
+        <strong>{{ kpis.ingest_success_pct|default:"—" }}%</strong>
+      </td>
+      <td>
+        <strong>{{ kpis.dq_score_pct|default:"—" }}%</strong>
+      </td>
+      <td>
+        Incidents: <strong>{{ kpis.open_incidents|default:"—" }}</strong>
+      </td>
+    </tr>
+  </table>
+</section>
+
+<!-- Q2 fix: make spacing consistent with other sections -->
+<div style="display:grid; grid-template-columns:1fr; gap:1em; margin-top:1em;">
+
+  <section class="card">
+    <h3 style="margin-top:0;">
+    PIPELINE HEALTH
+    <button
+        type="button"
+        class="info-btn"
+        id="pipelineInfoBtn"
+        aria-label="Show pipeline job definitions"
+        aria-haspopup="dialog"
+        aria-controls="pipelineModal"
+        title="Definitions"
+    >i</button>
+    </h3>
+
+
+    <!-- Q1 fix: force identical column widths so headers align across both tables -->
+    <table style="width:100%; table-layout:fixed;">
+      <colgroup>
+        <col style="width:55%;">
+        <col style="width:20%;">
+        <col style="width:25%;">
+      </colgroup>
+
+      <tr>
+        <th style="text-align:left;">Job</th>
+        <th style="text-align:left;">Status</th>
+        <th style="text-align:left;">Last Run (UTC)</th>
+      </tr>
+
+      {% for r in pipeline %}
+      <tr>
+        <td>{{ r.job_name }}</td>
+        <td>{{ r.last_status }}</td>
+        <td style="white-space:nowrap;">
+          <span>{{ r.last_run_at|date:"Y-m-d" }}</span>
+          <span style="display:inline-block; width:1em;"></span>
+          <span>{{ r.last_run_at|date:"H:i" }}</span>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">—</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0;">
+    DATA QUALITY
+    <button
+        type="button"
+        class="info-btn"
+        id="dqInfoBtn"
+        aria-label="Show data quality check definitions"
+        aria-haspopup="dialog"
+        aria-controls="dqModal"
+        title="Definitions"
+    >i</button>
+    </h3>
+
+
+    <!-- Q1 fix: same colgroup as pipeline -->
+    <table style="width:100%; table-layout:fixed;">
+      <colgroup>
+        <col style="width:55%;">
+        <col style="width:20%;">
+        <col style="width:25%;">
+      </colgroup>
+
+      <tr>
+        <th style="text-align:left;">Check</th>
+        <th style="text-align:left;">Status</th>
+        <th style="text-align:left;">Last Run (UTC)</th>
+      </tr>
+
+      {% for r in dq %}
+      <tr>
+        <td>{{ r.check_name }}</td>
+        <td>{{ r.status }}</td>
+        <td style="white-space:nowrap;">
+          <span>{{ r.last_run_at|date:"Y-m-d" }}</span>
+          <span style="display:inline-block; width:1em;"></span>
+          <span>{{ r.last_run_at|date:"H:i" }}</span>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">—</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1em; margin-top:1em;">
+  <section class="card">
+    <h3 style="margin-top:0;">
+    ANOMALIES
+    <button
+        type="button"
+        class="info-btn"
+        id="anomalyInfoBtn"
+        aria-label="Show anomaly definitions"
+        aria-haspopup="dialog"
+        aria-controls="anomalyModal"
+        title="Definitions"
+    >i</button>
+    </h3>
+    <table style="width:100%;">
+      <tr>
+        <th style="text-align:left;">Anomaly</th>
+        <th style="text-align:left;">Count (24h)</th>
+      </tr>
+      {% for r in anomalies %}
+      <tr>
+        <td>{{ r.anomaly_type }}</td>
+        <td>{{ r.anomalies_24h }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2">—</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <h3 style="margin-top:0;">INCIDENTS</h3>
+    <div>Open: <strong>{{ incidents.open_count }}</strong></div>
+    <div>Acknowledged: <strong>{{ incidents.acknowledged_count }}</strong></div>
+    <div>Resolved (total): <strong>{{ incidents.resolved_count_total }}</strong></div>
+    <div>Resolved (24h): <strong>{{ incidents.resolved_count_24h }}</strong></div>
+    <div>Oldest open (min): <strong>{{ incidents.oldest_active_minutes }}</strong></div>
+  </section>
+</div>
+
+<section class="card" style="margin-top:1em;">
+  <h3 style="margin-top:0;">STATION / METRIC IMPACT (worst first)</h3>
+  <table style="width:100%;">
+    <tr>
+      <th style="text-align:left;">Station</th>
+      <th style="text-align:left;">Metric</th>
+      <th style="text-align:left;">Freshness</th>
+      <th style="text-align:left;">Anomaly</th>
+      <th style="text-align:left;">Severity</th>
+    </tr>
+    {% for r in impact %}
+    <tr>
+      <td>{{ r.station_name }}</td>
+      <td>{{ r.metric_code }}</td>
+      <td>{{ r.freshness_minutes }} min</td>
+      <td>{{ r.anomaly_type|default:"—" }}</td>
+      <td>{{ r.anomaly_severity|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">—</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+
+<section class="card" style="margin-top:1em;">
+  Last updated: <strong>{{ status.last_updated }}</strong> |
+  Contracts {{ status.contracts }} |
+  RLS enforced {{ status.rls|yesno:"✓,—" }} |
+  CI passing {{ status.ci|yesno:"✓,—" }}
+</section>
+
+
+
+
+
+
+<div class="modal-backdrop" id="anomalyBackdrop" aria-hidden="true"></div>
+
+<div class="modal" id="anomalyModal" role="dialog" aria-modal="true" aria-labelledby="anomalyModalTitle" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4 class="modal-title" id="anomalyModalTitle">Anomaly definitions</h4>
+      <button type="button" class="modal-close" id="anomalyCloseBtn" aria-label="Close">✕</button>
+    </div>
+
+    <div class="defs">
+      <div class="def-item">
+        <p class="def-key">drop</p>
+        <p class="def-desc">Sudden downward drop in a metric relative to recent baseline.</p>
+      </div>
+      <div class="def-item">
+        <p class="def-key">flatline</p>
+        <p class="def-desc">Metric values stop changing over an extended window (possible sensor failure).</p>
+      </div>
+      <div class="def-item">
+        <p class="def-key">silent_station</p>
+        <p class="def-desc">Station stopped reporting any observations for one or more metrics.</p>
+      </div>
+      <div class="def-item">
+        <p class="def-key">spike</p>
+        <p class="def-desc">Sudden upward jump in a metric relative to recent baseline.</p>
+      </div>
+      <div class="def-item">
+        <p class="def-key">stale_data</p>
+        <p class="def-desc">Observations continue but observed_at does not advance (stuck timestamps).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<div class="modal-backdrop" id="pipelineBackdrop" aria-hidden="true"></div>
+
+<div class="modal" id="pipelineModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="pipelineModalTitle"
+     aria-hidden="true">
+
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4 class="modal-title" id="pipelineModalTitle">
+        Pipeline job definitions
+      </h4>
+      <button type="button"
+              class="modal-close"
+              id="pipelineCloseBtn"
+              aria-label="Close">✕</button>
+    </div>
+
+<div class="defs">
+  <div class="def-item">
+    <p class="def-key">ingest_openmeteo_all_stations</p>
+    <p class="def-desc">
+      Collects fresh weather data from all monitored stations and stores it
+      exactly as received. This step ensures the platform always has the latest
+      raw data available for processing and analysis.
+    </p>
+  </div>
+
+  <div class="def-item">
+    <p class="def-key">transform_raw_to_fact</p>
+    <p class="def-desc">
+      Cleans and standardizes the raw data so it can be reliably analysed.
+      Converts units, validates values, and prepares the data for dashboards
+      and reporting.
+    </p>
+  </div>
+
+  <div class="def-item">
+    <p class="def-key">dq_check_run</p>
+    <p class="def-desc">
+        Checks whether incoming data meets quality expectations.
+        Identifies missing, stale, or inconsistent data before it affects
+        dashboards and reports.
+    </p>
+  </div>
+
+  <div class="def-item">
+    <p class="def-key">anomaly_detection</p>
+    <p class="def-desc">
+      Monitors the data for unusual behaviour, such as sudden spikes, drops,
+      or stations that stop reporting. These anomalies can trigger incidents
+      for investigation.
+    </p>
+  </div>
+</div>
+  </div>
+</div>
+
+
+
+
+
+<div class="modal-backdrop" id="dqBackdrop" aria-hidden="true"></div>
+
+<div class="modal" id="dqModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="dqModalTitle"
+     aria-hidden="true">
+
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4 class="modal-title" id="dqModalTitle">
+        Data quality checks
+      </h4>
+      <button type="button"
+              class="modal-close"
+              id="dqCloseBtn"
+              aria-label="Close">✕</button>
+    </div>
+
+    <div class="defs">
+
+      <div class="def-item">
+        <p class="def-key">fact_freshness_minutes</p>
+        <p class="def-desc">
+          Measures how recently data was observed for each station and metric.
+          Identifies data that may be too old to meet freshness expectations.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">metric_completeness_pct</p>
+        <p class="def-desc">
+          Evaluates whether all expected metrics are present for each station
+          at the latest observation time. Highlights missing measurements.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">late_data_rate_pct</p>
+        <p class="def-desc">
+          Calculates the proportion of observations that arrived later than
+          the allowed lateness window. Indicates delayed or backfilled data.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">late_data_rate_pct_all_time</p>
+        <p class="def-desc">
+          Tracks the long-term rate of late-arriving data to reveal persistent
+          ingestion or source-level delays.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">raw_duplicate_key_count</p>
+        <p class="def-desc">
+          Detects duplicate records in the raw ingestion layer. Signals
+          potential re-ingestion, replay, or source duplication issues.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">fact_duplicate_key_count</p>
+        <p class="def-desc">
+          Identifies duplicate records in analytics-ready fact tables.
+          Indicates upstream deduplication or transformation problems.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">stations_missing_any_metric_count_latest_hour</p>
+        <p class="def-desc">
+          Counts stations that failed to report one or more expected metrics
+          in the most recent time window.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">value_out_of_range_count</p>
+        <p class="def-desc">
+          Flags measurements that fall outside expected value ranges.
+          Used to surface potential sensor errors or corrupted data.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+<div class="modal-backdrop" id="statusBackdrop" aria-hidden="true"></div>
+
+<div class="modal" id="statusModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="statusModalTitle"
+     aria-hidden="true">
+
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4 class="modal-title" id="statusModalTitle">Status + KPI definitions</h4>
+      <button type="button" class="modal-close" id="statusCloseBtn" aria-label="Close">✕</button>
+    </div>
+
+    <div class="defs">
+
+      <div class="def-item">
+        <p class="def-key">Status (GREEN / AMBER / RED)</p>
+        <p class="def-desc">
+          Overall platform health computed by <code>vw_platform_status</code>.
+          RED = open incidents.
+          AMBER = Data Quality fail in last 24h or freshness > 120
+          GREEN = none of the above.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">Freshness — Worst (minutes)</p>
+        <p class="def-desc">
+          Minutes since the most recent <code>fact_observation.observed_at</code>.
+          Lower is better (data is arriving recently).
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">Ingest Success (last 24h)</p>
+        <p class="def-desc">
+          Percent of <code>ops_job_run</code> rows in the last 24 hours where job status is
+          <code>succeeded</code> for the ingest pipeline.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">Data Quality (last 24h)</p>
+        <p class="def-desc">
+          Percent of <code>ops_dq_check_run</code> rows in the last 24 hours with status <code>pass</code>.
+          Warn/fail reduce this score.
+        </p>
+      </div>
+
+      <div class="def-item">
+        <p class="def-key">Open Incidents</p>
+        <p class="def-desc">
+          Count of incidents in <code>ops_incident</code> where <code>status &lt;&gt; 'resolved'</code>.
+          (This is not a “last 24h” metric.)
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

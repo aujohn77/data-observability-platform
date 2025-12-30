@@ -6,15 +6,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title|default:"Observability" }}</title>
   <link rel="stylesheet" href="{% static 'observability/observability.css' %}">
+
+
+  <style>
+  /* Info icon */
+  .info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25em;
+    height: 1.25em;
+    margin-left: .5em;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.9);
+    font-size: .9em;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+  }
+  .info-btn:hover { background: rgba(255,255,255,.10); }
+  .info-btn:focus { outline: 2px solid rgba(255,255,255,.35); outline-offset: 2px; }
+
+  /* Backdrop + modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    z-index: 1000;
+  }
+  .modal-backdrop.is-open { display: block; }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 1001;
+    padding: 4vh 4vw;
+    overflow: auto;
+  }
+  .modal.is-open { display: block; }
+
+  .modal-card {
+    max-width: 52em;
+    margin: 0 auto;
+    background: rgba(10, 18, 28, .98);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 12px;
+    box-shadow: 0 10px 35px rgba(0,0,0,.55);
+    padding: 1.1em 1.1em .9em 1.1em;
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1em;
+    margin-bottom: .8em;
+  }
+  .modal-title {
+    margin: 0;
+    font-size: 1.05em;
+    letter-spacing: .02em;
+  }
+  .modal-close {
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.9);
+    padding: .35em .55em;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .modal-close:hover { background: rgba(255,255,255,.10); }
+
+  .defs {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .7em;
+    margin: 0;
+  }
+  .def-item {
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
+    border-radius: 10px;
+    padding: .75em .85em;
+  }
+  .def-key {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: .95em;
+    margin: 0 0 .25em 0;
+    color: rgba(255,255,255,.95);
+  }
+  .def-desc {
+    margin: 0;
+    color: rgba(255,255,255,.80);
+    font-size: .95em;
+    line-height: 1.35;
+  }
+
+  @media (min-width: 900px) {
+    .defs { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
 </head>
+
 <body>
   <header class="topbar">
     <div class="brand">Data Observability</div>
     <nav class="nav">
-      <a href="/observability/status/">Status</a>
+      <a href="/observability/control-tower/">Control Tower</a>
       <a href="/observability/incidents/">Incidents</a>
       <a href="/observability/stations/">Stations</a>
-      <a href="/observability/freshness/">Freshness</a>
     </nav>
   </header>
 
@@ -22,5 +127,162 @@
     <h1>{{ title }}</h1>
     {% block content %}{% endblock %}
   </main>
+
+
+<script>
+  (function () {
+    const btn = document.getElementById("anomalyInfoBtn");
+    const modal = document.getElementById("anomalyModal");
+    const backdrop = document.getElementById("anomalyBackdrop");
+    const closeBtn = document.getElementById("anomalyCloseBtn");
+
+    let lastFocused = null;
+
+    function openModal() {
+      lastFocused = document.activeElement;
+
+      modal.classList.add("is-open");
+      backdrop.classList.add("is-open");
+
+      modal.setAttribute("aria-hidden", "false");
+      backdrop.setAttribute("aria-hidden", "false");
+
+      // Focus close button for keyboard users
+      closeBtn.focus();
+      document.addEventListener("keydown", onKeyDown);
+    }
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      backdrop.classList.remove("is-open");
+
+      modal.setAttribute("aria-hidden", "true");
+      backdrop.setAttribute("aria-hidden", "true");
+
+      document.removeEventListener("keydown", onKeyDown);
+
+      if (lastFocused && typeof lastFocused.focus === "function") {
+        lastFocused.focus();
+      }
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") closeModal();
+    }
+
+    if (btn) btn.addEventListener("click", openModal);
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (backdrop) backdrop.addEventListener("click", closeModal);
+  })();
+
+
+
+  // -----------------------------
+  // PIPELINE HEALTH MODAL
+  // -----------------------------
+  const pBtn = document.getElementById("pipelineInfoBtn");
+  const pModal = document.getElementById("pipelineModal");
+  const pBackdrop = document.getElementById("pipelineBackdrop");
+  const pClose = document.getElementById("pipelineCloseBtn");
+
+  if (pBtn && pModal && pBackdrop && pClose) {
+    pBtn.addEventListener("click", () => {
+      pModal.classList.add("is-open");
+      pBackdrop.classList.add("is-open");
+      pModal.setAttribute("aria-hidden", "false");
+      pBackdrop.setAttribute("aria-hidden", "false");
+      pClose.focus();
+    });
+
+    function closePipeline() {
+      pModal.classList.remove("is-open");
+      pBackdrop.classList.remove("is-open");
+      pModal.setAttribute("aria-hidden", "true");
+      pBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    pClose.addEventListener("click", closePipeline);
+    pBackdrop.addEventListener("click", closePipeline);
+  }
+
+
+
+  // -----------------------------
+  // DATA QUALITY MODAL
+  // -----------------------------
+  const dqBtn = document.getElementById("dqInfoBtn");
+  const dqModal = document.getElementById("dqModal");
+  const dqBackdrop = document.getElementById("dqBackdrop");
+  const dqClose = document.getElementById("dqCloseBtn");
+
+  if (dqBtn && dqModal && dqBackdrop && dqClose) {
+    dqBtn.addEventListener("click", () => {
+      dqModal.classList.add("is-open");
+      dqBackdrop.classList.add("is-open");
+      dqModal.setAttribute("aria-hidden", "false");
+      dqBackdrop.setAttribute("aria-hidden", "false");
+      dqClose.focus();
+    });
+
+    function closeDQ() {
+      dqModal.classList.remove("is-open");
+      dqBackdrop.classList.remove("is-open");
+      dqModal.setAttribute("aria-hidden", "true");
+      dqBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    dqClose.addEventListener("click", closeDQ);
+    dqBackdrop.addEventListener("click", closeDQ);
+  }
+
+
+
+
+
+
+
+  // -----------------------------
+  // STATUS + KPI DEFINITIONS MODAL
+  // -----------------------------
+  const sBtn = document.getElementById("statusInfoBtn");
+  const sModal = document.getElementById("statusModal");
+  const sBackdrop = document.getElementById("statusBackdrop");
+  const sClose = document.getElementById("statusCloseBtn");
+
+  if (sBtn && sModal && sBackdrop && sClose) {
+    sBtn.addEventListener("click", () => {
+      sModal.classList.add("is-open");
+      sBackdrop.classList.add("is-open");
+      sModal.setAttribute("aria-hidden", "false");
+      sBackdrop.setAttribute("aria-hidden", "false");
+      sClose.focus();
+    });
+
+    function closeStatus() {
+      sModal.classList.remove("is-open");
+      sBackdrop.classList.remove("is-open");
+      sModal.setAttribute("aria-hidden", "true");
+      sBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    sClose.addEventListener("click", closeStatus);
+    sBackdrop.addEventListener("click", closeStatus);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeStatus();
+    });
+  }
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
 </body>
 </html>

@@ -198,6 +198,126 @@ def freshness(request):
     return render(request, "observability/freshness.html", ctx)
 
 
+
+
+def control_tower(request):
+    # Top status bar
+    platform_status = _q(
+        """
+        select *
+        from public.vw_platform_status
+        limit 1
+        """,
+        many=False,
+    ) or {}
+
+    # KPI tiles
+    kpis = _q(
+        """
+        select *
+        from public.vw_platform_kpis
+        limit 1
+        """,
+        many=False,
+    ) or {}
+
+    # Panels
+    pipeline = _q(
+        """
+        select *
+        from public.vw_pipeline_health
+        order by last_run_at desc
+        """
+    ) or []
+
+    dq = _q(
+        """
+        select *
+        from public.vw_dq_summary
+        order by check_name
+        """
+    ) or []
+
+
+    anomalies = _q(
+        """
+        select *
+        from public.vw_anomaly_summary
+        order by anomalies_24h desc nulls last
+        """
+    ) or []
+
+
+
+    incidents = _q(
+        """
+        select *
+        from public.vw_incident_summary
+        limit 1
+        """,
+        many=False,
+    ) or {}
+
+    impact = _q(
+        """
+        select *
+        from public.vw_station_metric_impact
+        limit 10
+        """
+    ) or []
+
+    trends = _q(
+        """
+        select *
+        from public.vw_trends_24h
+        order by hour_start asc
+        """
+    ) or []
+
+    # Basic formatting helpers
+    def fmt_dt(v, fmt="%H:%M UTC"):
+        if not v:
+            return "—"
+        try:
+            return v.astimezone(timezone.utc).strftime(fmt)
+        except Exception:
+            return str(v)
+
+    ctx = {
+        "title": "Control Tower",
+        "status": {
+            "status": platform_status.get("status_color") or platform_status.get("status") or "—",
+            "last_ingest": fmt_dt(platform_status.get("last_ingest_at") or platform_status.get("last_ingest")),
+            "window": platform_status.get("window") or "24h",
+            "last_updated": fmt_dt(platform_status.get("as_of") or platform_status.get("last_updated_at")),
+            "contracts": platform_status.get("contracts_version") or "v1",
+            "rls": platform_status.get("rls_enforced"),
+            "ci": platform_status.get("ci_passing"),
+        },
+        "kpis": {
+            "freshness_worst": kpis.get("worst_freshness_minutes"),
+            "ingest_success_pct": kpis.get("ingest_success_rate_pct"),
+            "active_anomalies": kpis.get("active_anomaly_count"),
+            "open_incidents": kpis.get("open_incident_count"),
+            "dq_score_pct": kpis.get("dq_pass_rate_pct"),
+            "evaluated_at": fmt_dt(kpis.get("evaluated_at"), fmt="%H:%M UTC"),
+        },
+        "pipeline": pipeline,
+        "dq": dq,
+        "anomalies": anomalies,
+        "incidents": incidents,
+        "impact": impact,
+        "trends": trends,
+    }
+
+    return render(request, "observability/control_tower.html", ctx)
+
+
+
+
+
+
+
 # Keep index as a simple alias if you still reference it somewhere
 def index(request):
     return status(request)
