@@ -5,6 +5,9 @@ import psycopg2
 from psycopg2.extras import Json
 from dotenv import load_dotenv
 
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 load_dotenv()
 
 DATABASE_URL = os.environ["OBS_DATABASE_URL"]
@@ -20,6 +23,30 @@ METRICS = {
     "precipitation":           ("precipitation",         "millimetres",         "num"),
     "weather_code":            ("weather_code",          "dimensionless code",  "num"),
 }
+
+def _build_retrying_session() -> requests.Session:
+    """
+    GitHub runners sometimes hit transient TLS/handshake/read timeouts.
+    Use retries + backoff so the workflow doesn't die randomly.
+    """
+    retry = Retry(
+        total=6,
+        connect=6,
+        read=6,
+        status=6,
+        backoff_factor=1.5,                   # 0s, 1.5s, 3s, 6s, 12s, ...
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+        raise_on_status=False,
+        respect_retry_after_header=True,
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
+    s = requests.Session()
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    return s
+
+SESSION = _build_retrying_session()
 
 def start_job(cur, job_name: str) -> str:
     cur.execute("""
@@ -51,7 +78,11 @@ def fetch_open_meteo(lat: float, lon: float) -> dict:
         "past_days": 0,
         "forecast_days": 1,
     }
-    r = requests.get(OPEN_METEO_URL, params=params, timeout=20)
+
+    # More robust in CI: separate connect/read timeouts
+    # connect timeout: 15s (TLS handshake etc)
+    # read timeout: 90s (slow API response)
+    r = SESSION.get(OPEN_METEO_URL, params=params, timeout=(15, 90))
     r.raise_for_status()
     return r.json()
 
@@ -89,7 +120,6 @@ def build_rows_from_open_meteo(station_external_id: str, data: dict) -> list[dic
     chosen_time = times[i]
     observed_at = datetime.fromisoformat(chosen_time).replace(tzinfo=timezone.utc)
 
-    # Stable provenance (small and useful)
     provider = "OpenMeteo"
     lat = data.get("latitude")
     lon = data.get("longitude")
@@ -104,17 +134,16 @@ def build_rows_from_open_meteo(station_external_id: str, data: dict) -> list[dic
         if v is None:
             continue
 
-        # Per-row payload slice (only what you need to trace/debug THIS metric at THIS time)
         source_payload = {
             "provider": provider,
             "station_external_id": str(station_external_id),
             "latitude": lat,
             "longitude": lon,
-            "observed_at": chosen_time,          # ISO string
-            "field": field,                      # upstream field name
-            "metric_code": metric_code,          # your internal metric code
+            "observed_at": chosen_time,
+            "field": field,
+            "metric_code": metric_code,
             "unit": hourly_units.get(field, unit) or unit,
-            "value": v,                          # raw value as returned
+            "value": v,
         }
 
         row = {
@@ -122,7 +151,7 @@ def build_rows_from_open_meteo(station_external_id: str, data: dict) -> list[dic
             "station_external_id": str(station_external_id),
             "observed_at": observed_at,
             "metric_code": metric_code,
-            "unit": unit,            # keep your canonical unit column
+            "unit": unit,
             "quality_flag": None,
             "source_payload": source_payload,
         }
