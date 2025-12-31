@@ -3,7 +3,7 @@ name: data-observability-pipeline
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 */4 * * *"   # every 4 hours at minute 15
+    - cron: "15 */4 * * *"   # every 4 hours at minute 15 (UTC)
 
 jobs:
   run-pipeline:
@@ -21,20 +21,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-
-
       - name: Check OBS_DATABASE_URL exists
+        env:
+          OBS_DATABASE_URL: ${{ secrets.OBS_DATABASE_URL }}
         run: |
           if [ -z "${OBS_DATABASE_URL}" ]; then
-            echo "OBS_DATABASE_URL is EMPTY"; exit 1
+            echo "OBS_DATABASE_URL is EMPTY"
+            exit 1
           else
             echo "OBS_DATABASE_URL is set (length=${#OBS_DATABASE_URL})"
           fi
-        env:
-          OBS_DATABASE_URL: ${{ secrets.OBS_DATABASE_URL }}
-
-
-
 
       # ----------------------------
       # 1️⃣ INGEST
@@ -42,7 +38,7 @@ jobs:
       - name: Run ingestion
         env:
           OBS_DATABASE_URL: ${{ secrets.OBS_DATABASE_URL }}
-        run: python jobs/ingest.py
+        run: python -m jobs.ingest
 
       # ----------------------------
       # 2️⃣ TRANSFORM
@@ -50,7 +46,7 @@ jobs:
       - name: Run transform_fact
         env:
           OBS_DATABASE_URL: ${{ secrets.OBS_DATABASE_URL }}
-        run: python jobs/transform_fact.py
+        run: python -m jobs.transform_fact
 
       # ----------------------------
       # 3️⃣ DATA QUALITY
@@ -58,7 +54,7 @@ jobs:
       - name: Run data quality checks
         env:
           OBS_DATABASE_URL: ${{ secrets.OBS_DATABASE_URL }}
-        run: python jobs/run_dq.py
+        run: python -m jobs.run_dq
 
       # ----------------------------
       # 4️⃣ ANOMALY DETECTION
@@ -66,4 +62,4 @@ jobs:
       - name: Run anomaly detection
         env:
           OBS_DATABASE_URL: ${{ secrets.OBS_DATABASE_URL }}
-        run: python jobs/run_anomaly_detection.py
+        run: python -m jobs.run_anomaly_detection
