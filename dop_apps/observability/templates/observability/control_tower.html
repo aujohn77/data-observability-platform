@@ -43,38 +43,14 @@
   </div>
 </section>
 
-<section class="card">
-  <table style="width:100%;">
-    <tr>
-      <th style="text-align:left;">Freshness</th>
-      <th style="text-align:left;">Ingest Success (last 24h)</th>      
-      <th style="text-align:left;">Data Quality (last 24h)</th>
-      <th style="text-align:left;">Open</th>
-    </tr>
-    <tr>
-      <td>
-        Worst: <strong>{{ kpis.freshness_worst|default:"—" }} min</strong>
-      </td>
-      <td>
-        <strong>{{ kpis.ingest_success_pct|default:"—" }}%</strong>
-      </td>
-      <td>
-        <strong>{{ kpis.dq_score_pct|default:"—" }}%</strong>
-      </td>
-      <td>
-        Incidents: <strong>{{ kpis.open_incidents|default:"—" }}</strong>
-      </td>
-    </tr>
-  </table>
-</section>
 
 <!-- Q2 fix: make spacing consistent with other sections -->
 <div style="display:grid; grid-template-columns:1fr; gap:1em; margin-top:1em;">
 
   <section class="card">
     <h3 style="margin-top:0;">
-    PIPELINE HEALTH
-    <button
+      PIPELINE HEALTH
+      <button
         type="button"
         class="info-btn"
         id="pipelineInfoBtn"
@@ -82,11 +58,9 @@
         aria-haspopup="dialog"
         aria-controls="pipelineModal"
         title="Definitions"
-    >i</button>
+      >i</button>
     </h3>
 
-
-    <!-- Q1 fix: force identical column widths so headers align across both tables -->
     <table style="width:100%; table-layout:fixed;">
       <colgroup>
         <col style="width:55%;">
@@ -105,9 +79,7 @@
         <td>{{ r.job_name }}</td>
         <td>{{ r.last_status }}</td>
         <td style="white-space:nowrap;">
-          <span>{{ r.last_run_at|date:"Y-m-d" }}</span>
-          <span style="display:inline-block; width:1em;"></span>
-          <span>{{ r.last_run_at|date:"H:i" }}</span>
+          {{ r.last_run_at|default:"—" }}
         </td>
       </tr>
       {% empty %}
@@ -118,8 +90,8 @@
 
   <section class="card">
     <h3 style="margin-top:0;">
-    DATA QUALITY
-    <button
+      DATA QUALITY
+      <button
         type="button"
         class="info-btn"
         id="dqInfoBtn"
@@ -127,11 +99,9 @@
         aria-haspopup="dialog"
         aria-controls="dqModal"
         title="Definitions"
-    >i</button>
+      >i</button>
     </h3>
 
-
-    <!-- Q1 fix: same colgroup as pipeline -->
     <table style="width:100%; table-layout:fixed;">
       <colgroup>
         <col style="width:55%;">
@@ -150,9 +120,7 @@
         <td>{{ r.check_name }}</td>
         <td>{{ r.status }}</td>
         <td style="white-space:nowrap;">
-          <span>{{ r.last_run_at|date:"Y-m-d" }}</span>
-          <span style="display:inline-block; width:1em;"></span>
-          <span>{{ r.last_run_at|date:"H:i" }}</span>
+          {{ r.last_run_at|default:"—" }}
         </td>
       </tr>
       {% empty %}
@@ -199,45 +167,57 @@
     <div>Acknowledged: <strong>{{ incidents.acknowledged_count }}</strong></div>
     <div>Resolved (total): <strong>{{ incidents.resolved_count_total }}</strong></div>
     <div>Resolved (24h): <strong>{{ incidents.resolved_count_24h }}</strong></div>
-    <div>Oldest open (min): <strong>{{ incidents.oldest_active_minutes }}</strong></div>
   </section>
 </div>
 
-<section class="card" style="margin-top:1em;">
-  <h3 style="margin-top:0;">STATION / METRIC IMPACT (worst first)</h3>
-  <table style="width:100%;">
-    <tr>
-      <th style="text-align:left;">Station</th>
-      <th style="text-align:left;">Metric</th>
-      <th style="text-align:left;">Freshness</th>
-      <th style="text-align:left;">Anomaly</th>
-      <th style="text-align:left;">Severity</th>
-    </tr>
-    {% for r in impact %}
-    <tr>
-      <td>{{ r.station_name }}</td>
-      <td>{{ r.metric_code }}</td>
-      <td>{{ r.freshness_minutes }} min</td>
-      <td>{{ r.anomaly_type|default:"—" }}</td>
-      <td>{{ r.anomaly_severity|default:"—" }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="6">—</td></tr>
-    {% endfor %}
-  </table>
-</section>
+
 
 
 <section class="card" style="margin-top:1em;">
-  Last updated: <strong>{{ status.last_updated }}</strong> |
-  Contracts {{ status.contracts }} |
-  RLS enforced {{ status.rls|yesno:"✓,—" }} |
-  CI passing {{ status.ci|yesno:"✓,—" }}
+  <h3 style="margin-top:0;">🔒 SECURITY (ENFORCEMENT STATUS)</h3>
+
+  <div style="margin-bottom:.75em;">
+    RLS enforced · Roles: Anonymous users · Analysts · Administrators  <br>
+    Automated security checks run daily via CI.
+
+
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:.35em;">
+    <a
+      href="https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml"
+      target="_blank"
+      rel="noopener"
+      style="color:#8ad4a5; text-decoration:underline; display:inline-block; width:fit-content;"
+    >
+      View security test results
+    </a>
+
+    <a
+      href="https://github.com/aujohn77/data-observability-platform/blob/main/db/tests/security_rls_smoke.sql"
+      target="_blank"
+      rel="noopener"
+      style="color:#8ad4a5; text-decoration:underline; display:inline-block; width:fit-content;"
+    >
+      View security test specification
+    </a>
+
+    <a
+      href="https://github.com/aujohn77/data-observability-platform/tree/main/db/rls"
+      target="_blank"
+      rel="noopener"
+      style="color:#8ad4a5; text-decoration:underline; display:inline-block; width:fit-content;"
+    >
+      View RLS policies
+    </a>
+  </div>
 </section>
 
 
 
 
+
+<!-- Modals -->
 
 
 <div class="modal-backdrop" id="anomalyBackdrop" aria-hidden="true"></div>
@@ -446,7 +426,7 @@
 
   <div class="modal-card">
     <div class="modal-head">
-      <h4 class="modal-title" id="statusModalTitle">Status + KPI definitions</h4>
+      <h4 class="modal-title" id="statusModalTitle">Status</h4>
       <button type="button" class="modal-close" id="statusCloseBtn" aria-label="Close">✕</button>
     </div>
 
@@ -462,37 +442,6 @@
         </p>
       </div>
 
-      <div class="def-item">
-        <p class="def-key">Freshness — Worst (minutes)</p>
-        <p class="def-desc">
-          Minutes since the most recent <code>fact_observation.observed_at</code>.
-          Lower is better (data is arriving recently).
-        </p>
-      </div>
-
-      <div class="def-item">
-        <p class="def-key">Ingest Success (last 24h)</p>
-        <p class="def-desc">
-          Percent of <code>ops_job_run</code> rows in the last 24 hours where job status is
-          <code>succeeded</code> for the ingest pipeline.
-        </p>
-      </div>
-
-      <div class="def-item">
-        <p class="def-key">Data Quality (last 24h)</p>
-        <p class="def-desc">
-          Percent of <code>ops_dq_check_run</code> rows in the last 24 hours with status <code>pass</code>.
-          Warn/fail reduce this score.
-        </p>
-      </div>
-
-      <div class="def-item">
-        <p class="def-key">Open Incidents</p>
-        <p class="def-desc">
-          Count of incidents in <code>ops_incident</code> where <code>status &lt;&gt; 'resolved'</code>.
-          (This is not a “last 24h” metric.)
-        </p>
-      </div>
 
     </div>
   </div>

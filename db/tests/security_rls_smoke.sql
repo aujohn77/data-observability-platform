@@ -1,5 +1,5 @@
 -- =========================================================
--- RLS SECURITY SMOKE TESTS (CI / RECRUITER SAFE)
+-- RLS SECURITY TESTS
 -- Expects psql variables:
 --   :ana_uuid
 --   :ops_uuid

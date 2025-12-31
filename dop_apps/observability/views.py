@@ -1,16 +1,17 @@
 import os
-from datetime import timezone
-from django.shortcuts import render
+from datetime import timezone as dt_timezone
+from pathlib import Path
 
+from django.shortcuts import render
+from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
-from pathlib import Path
 
 
 # load only the observability .env (NOT fx/.env)
 OBS_ENV = Path(__file__).resolve().parents[2] / "jobs" / ".env"
 load_dotenv(dotenv_path=OBS_ENV, override=False)
+
 
 def _get_obs_db_url():
     url = os.getenv("OBS_DATABASE_URL")
@@ -34,8 +35,17 @@ def _q(sql, params=None, many=True):
         conn.close()
 
 
+def _to_utc_str(v, fmt="%Y-%m-%d %H:%M UTC"):
+    """Format aware datetimes as UTC for consistent UI rendering."""
+    if not v:
+        return "—"
+    try:
+        return v.astimezone(dt_timezone.utc).strftime(fmt)
+    except Exception:
+        return str(v)
+
+
 def status(request):
-    # 1) KPIs from public view
     health = _q(
         """
         select last_success_at, failures_7d, anomalies_24h
@@ -46,14 +56,8 @@ def status(request):
         many=False,
     ) or {}
 
-    last_success = health.get("last_success_at")
-    if last_success is not None:
-        # Make it readable in UI
-        last_success_str = last_success.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    else:
-        last_success_str = "—"
+    last_success_str = _to_utc_str(health.get("last_success_at"), "%Y-%m-%d %H:%M UTC")
 
-    # 2) Optional: recent job runs (may be RLS-protected). If blocked, just show empty.
     runs = []
     try:
         runs = _q(
@@ -64,11 +68,10 @@ def status(request):
             limit 10
             """
         )
-        # Normalize times to short strings
         for r in runs:
             for k in ("started_at", "ended_at"):
                 if r.get(k):
-                    r[k] = r[k].astimezone(timezone.utc).strftime("%H:%M")
+                    r[k] = _to_utc_str(r[k], "%H:%M")
     except Exception:
         runs = []
 
@@ -85,6 +88,7 @@ def status(request):
 
 
 def incidents(request):
+    # NOTE: This pulls from the VIEW (safer) not the base table.
     items = _q(
         """
         select
@@ -94,21 +98,17 @@ def incidents(request):
           title,
           station_id,
           metric_id
-        from public.public_incidents
-        order by opened_at desc
+        from public.vw_incident_summary
+        order by opened_at desc nulls last
         limit 50
         """
     )
 
-    # Format opened_at for display
     for it in items:
         if it.get("opened_at"):
-            it["opened_at"] = it["opened_at"].astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M")
+            it["opened_at"] = _to_utc_str(it["opened_at"], "%Y-%m-%d %H:%M")
 
-    ctx = {
-        "title": "Recent Incidents",
-        "items": items,
-    }
+    ctx = {"title": "Recent Incidents", "items": items}
     return render(request, "observability/incidents.html", ctx)
 
 
@@ -126,7 +126,6 @@ def stations(request):
     )
 
     def freshness_label(staleness):
-        # staleness is an interval -> comes back as timedelta
         if staleness is None:
             return "UNKNOWN"
         secs = staleness.total_seconds()
@@ -144,19 +143,15 @@ def stations(request):
                 "station_id": r.get("station_id"),
                 "name": r.get("station_name"),
                 "freshness": freshness_label(r.get("staleness")),
-                "last_seen": last_seen.astimezone(timezone.utc).strftime("%H:%M") if last_seen else "—",
+                "last_seen": _to_utc_str(last_seen, "%H:%M") if last_seen else "—",
             }
         )
 
-    ctx = {
-        "title": "Station Health",
-        "rows": ui_rows,
-    }
+    ctx = {"title": "Station Health", "rows": ui_rows}
     return render(request, "observability/stations.html", ctx)
 
 
 def freshness(request):
-    # Hourly view: bucket, fresh_1h, stations_total
     points = _q(
         """
         select bucket, fresh_1h, stations_total
@@ -166,7 +161,6 @@ def freshness(request):
         """
     )
 
-    # Build chart series oldest->newest
     points = list(reversed(points))
 
     series = []
@@ -175,10 +169,9 @@ def freshness(request):
         fresh = p.get("fresh_1h") or 0
         pct = round((fresh / total) * 100) if total else 0
         bucket = p.get("bucket")
-        label = bucket.astimezone(timezone.utc).strftime("%m-%d %H:%M") if bucket else ""
+        label = _to_utc_str(bucket, "%m-%d %H:%M").replace(" UTC", "") if bucket else ""
         series.append({"bucket": label, "pct": pct})
 
-    # Summary buckets from the same hourly data
     def avg_last(n):
         if not series:
             return 0
@@ -192,16 +185,12 @@ def freshness(request):
             {"bucket": "last 6h", "pct": avg_last(6)},
             {"bucket": "last 24h", "pct": avg_last(24)},
         ],
-        # If you later create a public view for late rate, we’ll swap this to real data.
         "late_rate": "—",
     }
     return render(request, "observability/freshness.html", ctx)
 
 
-
-
 def control_tower(request):
-    # Top status bar
     platform_status = _q(
         """
         select *
@@ -211,17 +200,6 @@ def control_tower(request):
         many=False,
     ) or {}
 
-    # KPI tiles
-    kpis = _q(
-        """
-        select *
-        from public.vw_platform_kpis
-        limit 1
-        """,
-        many=False,
-    ) or {}
-
-    # Panels
     pipeline = _q(
         """
         select *
@@ -238,7 +216,6 @@ def control_tower(request):
         """
     ) or []
 
-
     anomalies = _q(
         """
         select *
@@ -247,13 +224,11 @@ def control_tower(request):
         """
     ) or []
 
-
-
+    # Keep incidents as a VIEW (safer)
     incidents = _q(
         """
         select *
-        from public.vw_incident_summary
-        limit 1
+        from public.vw_incident_kpis
         """,
         many=False,
     ) or {}
@@ -274,14 +249,30 @@ def control_tower(request):
         """
     ) or []
 
-    # Basic formatting helpers
-    def fmt_dt(v, fmt="%H:%M UTC"):
-        if not v:
-            return "—"
-        try:
-            return v.astimezone(timezone.utc).strftime(fmt)
-        except Exception:
-            return str(v)
+    # ✅ Force UTC display for pipeline & dq timestamps (so templates never auto-localize)
+    for r in pipeline:
+        if r.get("last_run_at"):
+            r["last_run_at"] = _to_utc_str(r["last_run_at"], "%Y-%m-%d %H:%M")
+
+    for r in dq:
+        if r.get("last_run_at"):
+            r["last_run_at"] = _to_utc_str(r["last_run_at"], "%Y-%m-%d %H:%M")
+
+    # Optional: if these exist in your views, normalize them too (won't crash if absent)
+    for r in pipeline:
+        if r.get("started_at"):
+            r["started_at"] = _to_utc_str(r["started_at"], "%Y-%m-%d %H:%M")
+        if r.get("ended_at"):
+            r["ended_at"] = _to_utc_str(r["ended_at"], "%Y-%m-%d %H:%M")
+
+    for r in dq:
+        if r.get("checked_at"):
+            r["checked_at"] = _to_utc_str(r["checked_at"], "%Y-%m-%d %H:%M")
+        if r.get("run_at"):
+            r["run_at"] = _to_utc_str(r["run_at"], "%Y-%m-%d %H:%M")
+
+    def fmt_dt(v, fmt="%H:%M"):
+        return _to_utc_str(v, fmt)
 
     ctx = {
         "title": "Control Tower",
@@ -294,14 +285,6 @@ def control_tower(request):
             "rls": platform_status.get("rls_enforced"),
             "ci": platform_status.get("ci_passing"),
         },
-        "kpis": {
-            "freshness_worst": kpis.get("worst_freshness_minutes"),
-            "ingest_success_pct": kpis.get("ingest_success_rate_pct"),
-            "active_anomalies": kpis.get("active_anomaly_count"),
-            "open_incidents": kpis.get("open_incident_count"),
-            "dq_score_pct": kpis.get("dq_pass_rate_pct"),
-            "evaluated_at": fmt_dt(kpis.get("evaluated_at"), fmt="%H:%M UTC"),
-        },
         "pipeline": pipeline,
         "dq": dq,
         "anomalies": anomalies,
@@ -313,11 +296,5 @@ def control_tower(request):
     return render(request, "observability/control_tower.html", ctx)
 
 
-
-
-
-
-
-# Keep index as a simple alias if you still reference it somewhere
 def index(request):
     return status(request)

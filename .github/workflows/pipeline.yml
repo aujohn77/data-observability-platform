@@ -1,0 +1,54 @@
+name: data-observability-pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 */4 * * *"   # every 4 hours at minute 15
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ----------------------------
+      # 1️⃣ INGEST
+      # ----------------------------
+      - name: Run ingestion
+        env:
+          OBS_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python jobs/ingest.py
+
+      # ----------------------------
+      # 2️⃣ TRANSFORM
+      # ----------------------------
+      - name: Run transform_fact
+        env:
+          OBS_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python jobs/transform_fact.py
+
+      # ----------------------------
+      # 3️⃣ DATA QUALITY
+      # ----------------------------
+      - name: Run data quality checks
+        env:
+          OBS_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python jobs/run_dq.py
+
+      # ----------------------------
+      # 4️⃣ ANOMALY DETECTION
+      # ----------------------------
+      - name: Run anomaly detection
+        env:
+          OBS_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python jobs/run_anomaly_detection.py

@@ -16,6 +16,5 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Run ingestion
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SOURCE_URL: ${{ secrets.SOURCE_URL }}
+          OBS_DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python jobs/ingest.py
