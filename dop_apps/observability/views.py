@@ -296,5 +296,13 @@ def control_tower(request):
     return render(request, "observability/control_tower.html", ctx)
 
 
+
+
+def overview(request):
+    ctx = {"title": "Data Observability Platform"}
+    return render(request, "observability/project_review.html", ctx)
+
+
+
 def index(request):
     return status(request)
