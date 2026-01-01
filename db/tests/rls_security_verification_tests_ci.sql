@@ -1,8 +1,5 @@
 -- =========================================================
 -- RLS SECURITY TESTS
--- Expects psql variables:
---   :ana_uuid
---   :ops_uuid
 -- =========================================================
 
 -- Helper: store counts to avoid repeating logic
@@ -50,8 +47,6 @@ select 'analyst_no_raw_access' as check,
 
 -- ---------------------------------------------------------
 -- 4) ANALYST sees only authorized stations
--- Expect: analyst can see exactly the stations they are granted in authz_user_access
--- (typically 1 station in your seed)
 -- ---------------------------------------------------------
 with
 grants as (
@@ -77,8 +72,6 @@ select 'analyst_station_scope_enforced' as check,
 
 -- ---------------------------------------------------------
 -- 5) ANALYST sees only authorized facts
--- Expect: all facts visible to analyst have station_id within their grants
--- and analyst sees at least 1 fact (so test is meaningful)
 -- ---------------------------------------------------------
 with
 grants as (
@@ -103,8 +96,6 @@ select 'analyst_fact_scope_enforced' as check,
 
 -- ---------------------------------------------------------
 -- 6) ANALYST cannot write reference data
--- Attempt an insert into dim_station; should error.
--- We convert errors into PASS using a DO block.
 -- ---------------------------------------------------------
 do $$
 begin
@@ -136,8 +127,6 @@ select 'ops_can_read_raw' as check,
 
 -- ---------------------------------------------------------
 -- 9) User can only see their own authz row(s)
--- Expect: ops sees only their own rows in authz_user_access (count = their own grants)
--- and cannot see analyst rows
 -- ---------------------------------------------------------
 with
 ops_rows as (

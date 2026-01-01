@@ -30,4 +30,4 @@ jobs:
             -v ON_ERROR_STOP=1 \
             -v ana_uuid="$ANA_UUID" \
             -v ops_uuid="$OPS_UUID" \
-            -f db/tests/security_rls_smoke.sql
+            -f db/tests/rls_security_verification_tests_ci.sql
