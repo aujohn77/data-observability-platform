@@ -20,9 +20,19 @@ def _get_obs_db_url():
     return url
 
 
+def _to_utc_str(v, fmt="%Y-%m-%d %H:%M UTC"):
+    """Format aware datetimes as UTC for consistent UI rendering."""
+    if not v:
+        return "—"
+    try:
+        return v.astimezone(dt_timezone.utc).strftime(fmt)
+    except Exception:
+        return str(v)
+
+
 def _q(sql, params=None, many=True):
     """
-    Small helper: run a SELECT and return dict rows.
+    Legacy helper: run a SELECT and return dict rows.
     many=True -> fetchall
     many=False -> fetchone
     """
@@ -35,14 +45,10 @@ def _q(sql, params=None, many=True):
         conn.close()
 
 
-def _to_utc_str(v, fmt="%Y-%m-%d %H:%M UTC"):
-    """Format aware datetimes as UTC for consistent UI rendering."""
-    if not v:
-        return "—"
-    try:
-        return v.astimezone(dt_timezone.utc).strftime(fmt)
-    except Exception:
-        return str(v)
+def _q_cur(cur, sql, params=None, many=True):
+    """Run a SELECT using an existing cursor (single-connection per request)."""
+    cur.execute(sql, params or {})
+    return cur.fetchall() if many else cur.fetchone()
 
 
 def status(request):
@@ -191,81 +197,84 @@ def freshness(request):
 
 
 def control_tower(request):
-    platform_status = _q(
-        """
-        select *
-        from public.vw_platform_status
-        limit 1
-        """,
-        many=False,
-    ) or {}
+    """
+    Performance fixes:
+    1) Single DB connection for the whole view (Supabase SSL handshakes are expensive)
+    2) Remove heavy queries not used in the template (impact, trends)
+    3) Select only needed columns (avoid pulling big JSONB/details via select *)
+    """
+    conn = psycopg2.connect(_get_obs_db_url(), connect_timeout=5)
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
 
-    pipeline = _q(
-        """
-        select *
-        from public.vw_pipeline_health
-        order by last_run_at desc
-        """
-    ) or []
+            platform_status = _q_cur(
+                cur,
+                """
+                select *
+                from public.vw_platform_status
+                limit 1
+                """,
+                many=False,
+            ) or {}
 
-    dq = _q(
-        """
-        select *
-        from public.vw_dq_summary
-        order by check_name
-        """
-    ) or []
 
-    anomalies = _q(
-        """
-        select *
-        from public.vw_anomaly_summary
-        order by anomalies_24h desc nulls last
-        """
-    ) or []
+            pipeline = _q_cur(
+                cur,
+                """
+                select *
+                from public.vw_pipeline_health
+                order by last_run_at desc
+                """,
+            ) or []
 
-    # Keep incidents as a VIEW (safer)
-    incidents = _q(
-        """
-        select *
-        from public.vw_incident_kpis
-        """,
-        many=False,
-    ) or {}
+            dq = _q_cur(
+                cur,
+                """
+                select *
+                from public.vw_dq_summary
+                order by check_name
+                """,
+            ) or []
 
-    impact = _q(
-        """
-        select *
-        from public.vw_station_metric_impact
-        limit 10
-        """
-    ) or []
+            anomalies = _q_cur(
+                cur,
+                """
+                select
+                  anomaly_type,
+                  anomalies_24h
+                from public.vw_anomaly_summary
+                order by anomalies_24h desc nulls last
+                """,
+            ) or []
 
-    trends = _q(
-        """
-        select *
-        from public.vw_trends_24h
-        order by hour_start asc
-        """
-    ) or []
+            incidents = _q_cur(
+                cur,
+                """
+                select
+                  open_count,
+                  acknowledged_count,
+                  resolved_count_total,
+                  resolved_count_24h
+                from public.vw_incident_kpis
+                """,
+                many=False,
+            ) or {}
+
+    finally:
+        conn.close()
 
     # ✅ Force UTC display for pipeline & dq timestamps (so templates never auto-localize)
     for r in pipeline:
         if r.get("last_run_at"):
             r["last_run_at"] = _to_utc_str(r["last_run_at"], "%Y-%m-%d %H:%M")
-
-    for r in dq:
-        if r.get("last_run_at"):
-            r["last_run_at"] = _to_utc_str(r["last_run_at"], "%Y-%m-%d %H:%M")
-
-    # Optional: if these exist in your views, normalize them too (won't crash if absent)
-    for r in pipeline:
         if r.get("started_at"):
             r["started_at"] = _to_utc_str(r["started_at"], "%Y-%m-%d %H:%M")
         if r.get("ended_at"):
             r["ended_at"] = _to_utc_str(r["ended_at"], "%Y-%m-%d %H:%M")
 
     for r in dq:
+        if r.get("last_run_at"):
+            r["last_run_at"] = _to_utc_str(r["last_run_at"], "%Y-%m-%d %H:%M")
         if r.get("checked_at"):
             r["checked_at"] = _to_utc_str(r["checked_at"], "%Y-%m-%d %H:%M")
         if r.get("run_at"):
@@ -274,10 +283,21 @@ def control_tower(request):
     def fmt_dt(v, fmt="%H:%M"):
         return _to_utc_str(v, fmt)
 
+    status_text = platform_status.get("status_color") or platform_status.get("status") or "—"
+
+    dot_color = "#64748b"
+    if status_text == "GREEN":
+        dot_color = "#22c55e"
+    elif status_text == "AMBER":
+        dot_color = "#f59e0b"
+    elif status_text == "RED":
+        dot_color = "#ef4444"
+
     ctx = {
         "title": "Control Tower",
         "status": {
-            "status": platform_status.get("status_color") or platform_status.get("status") or "—",
+            "status": status_text,
+            "dot_color": dot_color,  # ✅ NEW
             "last_ingest": fmt_dt(platform_status.get("last_ingest_at") or platform_status.get("last_ingest")),
             "window": platform_status.get("window") or "24h",
             "last_updated": fmt_dt(platform_status.get("as_of") or platform_status.get("last_updated_at")),
@@ -289,19 +309,14 @@ def control_tower(request):
         "dq": dq,
         "anomalies": anomalies,
         "incidents": incidents,
-        "impact": impact,
-        "trends": trends,
     }
 
     return render(request, "observability/control_tower.html", ctx)
 
 
-
-
 def overview(request):
     ctx = {"title": ""}
     return render(request, "observability/project_review.html", ctx)
-
 
 
 def index(request):

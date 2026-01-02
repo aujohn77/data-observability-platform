@@ -26,18 +26,14 @@
           border-radius:50%;
           margin:0 .35em 0 .15em;
           vertical-align:middle;
-          background:
-            {% if status.status == 'GREEN' %}#22c55e
-            {% elif status.status == 'AMBER' %}#f59e0b
-            {% elif status.status == 'RED' %}#ef4444
-            {% else %}#64748b{% endif %};
+          background-color: {{ status.dot_color }};
         ">
       </span>
 
       <strong>{{ status.status|default:"—" }}</strong>
 
       |
-      Last ingest: <strong>{{ status.last_ingest|default:"—" }}</strong>
+      Last ingest: <strong>{{ status.last_ingest|default:"—" }} (UTC)</strong>
     </div>
 
   </div>
@@ -173,45 +169,6 @@
 
 
 
-<section class="card" style="margin-top:1em;">
-  <h3 style="margin-top:0;">🔒 SECURITY (ENFORCEMENT STATUS)</h3>
-
-  <div style="margin-bottom:.75em;">
-    RLS enforced · Roles: Anonymous users · Analysts · Administrators  <br>
-    Automated security checks run daily via CI.
-
-
-  </div>
-
-  <div style="display:flex; flex-direction:column; gap:.35em;">
-    <a
-      href="https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml"
-      target="_blank"
-      rel="noopener"
-      style="color:#8ad4a5; text-decoration:underline; display:inline-block; width:fit-content;"
-    >
-      View security test results
-    </a>
-
-    <a
-      href="https://github.com/aujohn77/data-observability-platform/blob/main/db/tests/security_rls_smoke.sql"
-      target="_blank"
-      rel="noopener"
-      style="color:#8ad4a5; text-decoration:underline; display:inline-block; width:fit-content;"
-    >
-      View security test specification
-    </a>
-
-    <a
-      href="https://github.com/aujohn77/data-observability-platform/tree/main/db/rls"
-      target="_blank"
-      rel="noopener"
-      style="color:#8ad4a5; text-decoration:underline; display:inline-block; width:fit-content;"
-    >
-      View RLS policies
-    </a>
-  </div>
-</section>
 
 
 
