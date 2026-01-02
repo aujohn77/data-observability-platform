@@ -299,7 +299,7 @@ def control_tower(request):
 
 
 def overview(request):
-    ctx = {"title": "Data Observability Platform"}
+    ctx = {"title": ""}
     return render(request, "observability/project_review.html", ctx)
 
 

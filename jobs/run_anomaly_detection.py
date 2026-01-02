@@ -1,9 +1,3 @@
-# ============================================
-# jobs/run_anomaly_detection.py (orchestrator)
-# Status vocabulary: started / succeeded / failed
-# Runs detectors in a loop (modular)
-# Stage 9b: create/link incidents for NEW anomalies
-# ============================================
 
 import os
 import time

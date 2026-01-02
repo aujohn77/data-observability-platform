@@ -2,8 +2,6 @@
 -- RLS SECURITY TESTS
 -- =========================================================
 
--- Helper: store counts to avoid repeating logic
--- (psql doesn't have variables like PL/pgSQL; we use CTEs)
 
 -- ---------------------------------------------------------
 -- 0) Preconditions: seeded data exists

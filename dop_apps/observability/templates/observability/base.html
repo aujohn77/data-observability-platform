@@ -114,15 +114,21 @@
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="brand">Data Observability</div>
+<header class="topbar">
     <nav class="nav">
-      <a href="{% url 'observability:overview' %}">Overview</a>
-      <a href="/observability/control-tower/">Control Tower</a>
-      <a href="/observability/incidents/">Incidents</a>
-      <a href="/observability/stations/">Stations</a>
+      <div class="nav-left">
+        <a href="/">Home</a>
+        <a href="/about/">About</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="{% url 'observability:overview' %}">Project Overview</a>
+        <a href="/observability/control-tower/">Monitoring Dashboard</a>
+        <a href="/observability/incidents/">Incidents</a>
+        <a href="/observability/stations/">Stations</a>
+      </div>
     </nav>
-  </header>
+</header>
 
   <main class="container">
     <h1>{{ title }}</h1>

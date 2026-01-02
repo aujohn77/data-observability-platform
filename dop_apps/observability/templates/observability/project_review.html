@@ -1,363 +1,380 @@
-{# templates/observability/project_review.html #}
-{% extends "observability/base.html" %}
+  {# templates/observability/project_review.html #}
+  {% extends "observability/base.html" %}
+  {% load static %}
 
-{% block content %}
+  {% block content %}
 
-<section class="card">
-  <div style="text-align:center; padding:0.5em 0;">
-    <div style="font-weight:800; letter-spacing:0.03em;">DATA OBSERVABILITY PLATFORM</div>
-    <div style="opacity:0.9; margin-top:0.3em;">Production-Grade Data Monitoring &amp; Governance</div>
-  </div>
-</section>
 
 <section class="card">
-  <h3 style="margin-top:0;">Overview</h3>
-  <p style="margin:0.6em 0 0 0;">
-    This project demonstrates a production-style data platform with<br>
-    database-enforced security, operational monitoring, and automated<br>
-    validation.
-  </p>
-  <p style="margin:0.8em 0 0 0;">
-    All claims below are backed by raw system exports and CI tests.
-  </p>
-</section>
+  <h1 style="margin-top:0;">Data Observability Platform (Independent Project)</h1>
 
-<section class="card">
-  <h3 style="margin-top:0;">1. Architecture</h3>
-  <ul style="margin:0.6em 0 0 1.2em;">
-    <li>Layered design: Raw → Warehouse → Ops</li>
-    <li>Incremental ingestion, idempotent processing</li>
-    <li>Database as system of record</li>
-  </ul>
-
-  <div style="margin-top:0.8em;">
-    <a href="#" class="btn" id="open-arch-diagram">View Architecture Diagram</a>
-  </div>
-</section>
-
-<section class="card">
-  <h3 style="margin-top:0;">2. Database Schema</h3>
-  <ul style="margin:0.6em 0 0 1.2em;">
-    <li>Normalized warehouse model</li>
-    <li>Explicit fact grain</li>
-    <li>Operational metadata separated from analytics</li>
-  </ul>
-
-  <div style="margin-top:0.8em;">
-    <a href="#" class="btn">View ERD</a>
-
-    <a
-      href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/schema.md"
-      class="btn"
-      style="margin-left:0.6em;"
-      target="_blank"
-      rel="noopener"
+  <div class="overview-hero">
+    <img
+      src="{% static 'observability/images/architecture_diagram_darker_match.png' %}"
+      alt="Data Observability Platform — architecture diagram"
+      loading="lazy"
     >
-      Read schema.md
-    </a>
-  </div>
-</section>
-
-
-<section class="card">
-  <h3 style="margin-top:0;">3. Security &amp; Row-Level Security (RLS)</h3>
-  <ul style="margin:0.6em 0 0 1.2em;">
-    <li>Database-native authorization (PostgreSQL RLS)</li>
-    <li>No reliance on application-layer enforcement</li>
-    <li>Least-privilege access model</li>
-  </ul>
-
-  <div style="margin-top:0.9em;">
-    <div style="font-weight:700; margin-bottom:0.4em;">Evidence (system-generated):</div>
-    <ul style="margin:0 0 0 1.2em;">
-      <li>RLS policies (pg_policies)</li>
-      <li>RLS enabled tables</li>
-      <li>Function execution privileges</li>
-    </ul>
   </div>
 
-  <div style="margin-top:0.8em;">
-    <a class="btn"
-      href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/rls_policies.md"
-      target="_blank" rel="noopener">
-      View RLS policies (GitHub)
-    </a>
-  </div>
-
-  <div style="margin-top:0.9em;">
-    <div style="font-weight:700; margin-bottom:0.4em;">Enforcement:</div>
-    <div style="opacity:0.95;">- CI security tests executed against live database</div>
-  </div>
-
-  <div style="margin-top:0.8em;">
-    <a href="#" class="btn">View RLS Security Verification Tests (CI)</a>
-    <a href="#" class="btn" style="margin-left:0.6em;">View GitHub Actions workflow</a>
-  </div>
-</section>
-
-<section class="card">
-  <h3 style="margin-top:0;">4. Operations &amp; Monitoring</h3>
-  <div style="font-weight:700; margin-top:0.4em;">▶ Live Control Tower Dashboard</div>
-
-  <div style="margin-top:0.9em; line-height:1.9;">
-    🔗 <a href="#">Job execution code (Python)</a><br>
-    🔗 <a href="#">Data quality checks (Python / SQL)</a><br>
-    🔗 <a href="#">Anomaly &amp; incident logic (Python / SQL)</a><br>
-    🔗 <a href="#">Pipeline automation (GitHub Actions .yml)</a>
-  </div>
-</section>
-
-<section class="card">
-  <h3 style="margin-top:0;">5. Data Contracts (optional)</h3>
-  <ul style="margin:0.6em 0 0 1.2em;">
-    <li>Canonical metrics and units</li>
-    <li>Time semantics and lateness rules</li>
-    <li>Validation expectations</li>
-  </ul>
-
-  <div style="margin-top:0.8em;">
-    <a href="#" class="btn">Read data_contracts.md</a>
-    <a href="#" class="btn" style="margin-left:0.6em;">Download metric_inventory.csv</a>
-  </div>
-</section>
-
-<section class="card">
-  <h3 style="margin-top:0;">Repository &amp; Automation</h3>
-  <ul style="margin:0.6em 0 0 1.2em;">
-    <li>Full source code</li>
-    <li>CI pipelines</li>
-    <li>Scheduled ingestion jobs</li>
-  </ul>
-
-  <div style="margin-top:0.8em;">
-    <a href="#" class="btn">GitHub Repository</a>
-    <a href="#" class="btn" style="margin-left:0.6em;">CI Workflows</a>
-  </div>
-</section>
-
-<section class="card" style="text-align:center; opacity:0.9;">
-  End of technical review material
-</section>
-
-
-
-
-
-<!-- Architecture Diagram Modal -->
-<div class="modal-backdrop" id="arch-modal" aria-hidden="true">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="arch-title">
-    <div class="modal-head">
-      <div>
-        <div id="arch-title" class="modal-title">Architecture Diagram</div>
-        <div class="modal-subtitle">End-to-end platform flow (raw → warehouse → ops)</div>
-      </div>
-      <button class="modal-close" id="close-arch-modal" aria-label="Close">×</button>
-    </div>
-
-    <div class="modal-body">
-      <pre class="ascii-diagram">
-┌──────────────────────────┐
-│ External Data Sources    │
-│ (Public Sensors / APIs)  │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ Ingestion Jobs           │
-│ (Scheduled / CI-trigger) │
-│ • incremental            │
-│ • idempotent             │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ RAW LAYER (Database)     │
-│ raw_observations         │
-│ • append-only            │
-│ • source payload stored  │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ TRANSFORM / MODEL        │
-│ Jobs (CI / Workers)      │
-│ • normalize              │
-│ • deduplicate            │
-│ • enforce contracts      │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ WAREHOUSE LAYER          │
-│ fact_observation         │
-│ dim_station              │
-│ dim_metric               │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ OPS / OBSERVABILITY      │
-│ ops_job_run              │
-│ ops_dq_check_run         │
-│ ops_anomaly              │
-│ ops_incident             │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ APPLICATION / DASHBOARD  │
-│ (Read-only views)        │
-│ • Status                 │
-│ • Incidents              │
-│ • Stations               │
-└─────────────┬────────────┘
-              │
-              ▼
-┌──────────────────────────┐
-│ USERS                    │
-│ • anon                   │
-│ • analyst                │
-│ • ops                    │
-│ (RLS enforced in DB)     │
-└──────────────────────────┘
-      </pre>
-    </div>
-  </div>
+<div class="overview-text">
+  <p style="margin:0.6em 0 0 0;">
+    This project is a production-style data observability platform. It ingests raw data, transforms it into 
+    a clean warehouse model, runs automated data-quality checks, and detects anomalies that open incidents. 
+    All dashboards read from secure database views, and access is enforced with Row-Level Security (RLS).
+  </p>
 </div>
+</section>
+
+  <!-- 1 + 2 are INDEPENDENT sections side-by-side (WITH GAP) -->
+  <div class="pair-grid" style="margin-top:1.2em;">
+  <section class="card pair-card">
+    <h3 style="margin-top:0;">1. Architecture</h3>
+    <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+      End-to-end flow: source → ingest → warehouse → ops → dashboards.
+    </div>
+
+    <div style="margin-top:0.6em; line-height:1.9;">
+      • <a href="#" class="link" id="open-arch-diagram">Architecture Diagram</a>
+    </div>
+  </section>
+
+  <section class="card pair-card">
+    <h3 style="margin-top:0;">2. Database Schema</h3>
+    <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+      Core tables, keys, and relationships used by the platform.
+    </div>
+
+    <div style="margin-top:0.6em; line-height:1.9;">
+      • <a href="#" class="link">Database ERD</a><br>
+      • <a
+          href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/schema.md"
+          class="link"
+          target="_blank"
+          rel="noopener"
+        >Schema Documentation</a>
+    </div>
+  </section>
+  </div>
+
+  <!-- 3 is ONE section with internal columns (NO GAP / no mini-cards) -->
+  <section class="card" style="margin-top:1.2em;">
+    <h3 style="margin-top:0;">3. Row-Level Security (RLS)</h3>
+    <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+      Access rules enforced in the database and verified by CI tests.
+    </div>
+
+    <div style="margin-top:0.6em;">
+      <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+        <colgroup>
+          <col style="width:33.333%;">
+          <col style="width:33.333%;">
+          <col style="width:33.333%;">
+        </colgroup>
+
+        <tr>
+          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
+            Policies
+          </th>
+          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
+            Verification Tests
+          </th>
+          <th style="text-align:left; font-weight:700; padding:0.2em 0 0.4em 0;">
+            Automation (CI)
+          </th>
+        </tr>
+
+        <tr style="vertical-align:top;">
+          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+            • <a
+                href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/rls_policies.md"
+                class="link" target="_blank" rel="noopener"
+              >RLS Policies</a>
+          </td>
+
+          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+            • <a
+                href="https://github.com/aujohn77/data-observability-platform/blob/main/db/tests/rls_security_verification_tests_ci.sql"
+                class="link" target="_blank" rel="noopener"
+              >RLS Verification Tests</a>
+          </td>
+
+          <td style="padding:0; line-height:1.9; word-break:break-word;">
+            • <a
+                href="https://github.com/aujohn77/data-observability-platform/blob/main/.github/workflows/security_rls_tests.yml"
+                class="link" target="_blank" rel="noopener"
+              >RLS Test Workflow</a><br>
+
+            • <a
+                href="https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml"
+                class="link" target="_blank" rel="noopener"
+              >RLS Test Status</a> ☑
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4 is ONE section with internal columns (NO GAP / no mini-cards) -->
+  <section class="card" style="margin-top:1.2em;">
+    <h3 style="margin-top:0;">4. Monitoring  &amp; Operations</h3>
+      <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+      Dashboards, jobs, and automation for pipeline health and incidents.
+    </div>
+
+    <div style="margin-top:0.6em;">
+      <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+        <colgroup>
+          <col style="width:33.333%;">
+          <col style="width:33.333%;">
+          <col style="width:33.333%;">
+        </colgroup>
+
+        <tr>
+          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
+            Live Dashboards
+          </th>
+          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
+            Jobs
+          </th>
+          <th style="text-align:left; font-weight:700; padding:0.2em 0 0.4em 0;">
+            Automation (CI)
+          </th>
+        </tr>
+
+        <tr style="vertical-align:top;">
+          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+            • <a href="{% url 'observability:control_tower' %}" class="link link-monitor">Monitoring Dashboard</a><br>
+            • <a href="{% url 'observability:incidents' %}" class="link">Incidents</a><br>
+            • <a href="{% url 'observability:stations' %}" class="link">Stations</a>
+          </td>
+
+          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/ingest.py" class="link" target="_blank">Data Ingestion</a><br>
+            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/transform_fact.py" class="link" target="_blank">Data Transformation</a><br>
+            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/run_dq.py" class="link" target="_blank">Data Quality Checks</a><br>
+            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/run_anomaly_detection.py" class="link" target="_blank">Anomaly &amp; Incident Handling</a>
+          </td>
+
+          <td style="padding:0; line-height:1.9; word-break:break-word;">
+            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/.github/workflows/pipeline.yml" class="link" target="_blank">Jobs Workflow</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:1.2em;">
+    <h3 style="margin-top:0;">5. Data Contracts</h3>
+        <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+          Expected data shape and validation rules for ingestion and transforms.
+        </div>
+    <div style="margin-top:0.6em;">
+      • <a href="#" class="link">Data Contract Specification</a>
+    </div>
+  </section>
 
 
 
 
+  <!-- Architecture Diagram Modal -->
+  <div class="modal-backdrop" id="arch-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="arch-title">
+      <div class="modal-head">
+        <div>
+          <div id="arch-title" class="modal-title">Architecture Diagram</div>
+          <div class="modal-subtitle">End-to-end platform flow (raw → warehouse → ops)</div>
+        </div>
+        <button class="modal-close" id="close-arch-modal" aria-label="Close">×</button>
+      </div>
 
+      <div class="modal-body">
+        <pre class="ascii-diagram">
+  ┌──────────────────────────┐
+  │ External Data Sources    │
+  │ (Public Sensors / APIs)  │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ Ingestion Jobs           │
+  │ (Scheduled / CI-trigger) │
+  │ • incremental            │
+  │ • idempotent             │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ RAW LAYER (Database)     │
+  │ raw_observations         │
+  │ • append-only            │
+  │ • source payload stored  │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ TRANSFORM / MODEL        │
+  │ Jobs (CI / Workers)      │
+  │ • normalize              │
+  │ • deduplicate            │
+  │ • enforce contracts      │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ WAREHOUSE LAYER          │
+  │ fact_observation         │
+  │ dim_station              │
+  │ dim_metric               │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ OPS / OBSERVABILITY      │
+  │ ops_job_run              │
+  │ ops_dq_check_run         │
+  │ ops_anomaly              │
+  │ ops_incident             │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ APPLICATION / DASHBOARD  │
+  │ (Read-only views)        │
+  │ • Status                 │
+  │ • Incidents              │
+  │ • Stations               │
+  └─────────────┬────────────┘
+                │
+                ▼
+  ┌──────────────────────────┐
+  │ USERS                    │
+  │ • anon                   │
+  │ • analyst                │
+  │ • ops                    │
+  │ (RLS enforced in DB)     │
+  └──────────────────────────┘
+        </pre>
+      </div>
+    </div>
+  </div>
 
-
-
-
-
-
-
-
-<style>
-  /* Minimal button style (works even if your base CSS has none) */
-  .btn{
-    display:inline-block;
-    padding:0.45em 0.8em;
-    border:1px solid rgba(255,255,255,0.18);
-    border-radius:0.6em;
-    text-decoration:none;
-    color:inherit;
-    background:rgba(255,255,255,0.04);
-  }
-  .btn:hover{ background:rgba(255,255,255,0.08); }
-
-
-
-  /* Modal (matches your dark card style) */
-  .modal-backdrop{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.55);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:2vh 2vw;
-    z-index:9999;
-  }
-  .modal-backdrop.is-open{ display:flex; }
-
-  .modal-card{
-    width:min(64em, 96vw);
-    background:rgba(10,16,24,0.95);
-    border:1px solid rgba(255,255,255,0.12);
-    border-radius:1em;
-    box-shadow:0 20px 60px rgba(0,0,0,0.55);
-    overflow:hidden;
-  }
-
-  .modal-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:1em;
-    padding:1em 1.1em;
-    border-bottom:1px solid rgba(255,255,255,0.10);
-  }
-  .modal-title{ font-weight:800; letter-spacing:0.02em; }
-  .modal-subtitle{ opacity:0.85; margin-top:0.2em; font-size:0.95em; }
-
-  .modal-close{
-    border:1px solid rgba(255,255,255,0.16);
-    background:rgba(255,255,255,0.06);
-    color:inherit;
-    border-radius:0.7em;
-    width:2.2em;
-    height:2.2em;
-    cursor:pointer;
-    line-height:1;
-    font-size:1.2em;
-  }
-  .modal-close:hover{ background:rgba(255,255,255,0.10); }
-
-  .modal-body{
-    padding:1em 1.1em 1.2em 1.1em;
-    overflow:auto;
-    max-height:78vh;
-  }
-
-  .ascii-diagram{
-    margin:0;
-    padding:0.9em 1em;
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.10);
-    border-radius:0.8em;
-    white-space:pre;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size:0.92em;
-    line-height:1.35;
-  }
-
-
-
-</style>
-
-
-
-
-
-
-
-
-<script>
-  (function(){
-    const openBtn = document.getElementById("open-arch-diagram");
-    const modal = document.getElementById("arch-modal");
-    const closeBtn = document.getElementById("close-arch-modal");
-
-    function openModal(){
-      modal.classList.add("is-open");
-      modal.setAttribute("aria-hidden","false");
+  <style>
+    /* Minimal button style (works even if your base CSS has none) */
+    .btn{
+      display:inline-block;
+      padding:0.45em 0.8em;
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:0.6em;
+      text-decoration:none;
+      color:inherit;
+      background:rgba(255,255,255,0.04);
     }
-    function closeModal(){
-      modal.classList.remove("is-open");
-      modal.setAttribute("aria-hidden","true");
+    .btn:hover{ background:rgba(255,255,255,0.08); }
+
+    /* 1 + 2 layout: two independent cards with a GAP (like Anomalies / Incidents) */
+    .pair-grid{
+      display:flex;
+      gap:1em;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+    .pair-card{
+      flex:1 1 22em;
     }
 
-    openBtn?.addEventListener("click", (e) => {
-      e.preventDefault();
-      openModal();
-    });
-    closeBtn?.addEventListener("click", closeModal);
+    /* Modal (matches your dark card style) */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:2vh 2vw;
+      z-index:9999;
+    }
+    .modal-backdrop.is-open{ display:flex; }
 
-    modal?.addEventListener("click", (e) => {
-      if(e.target === modal) closeModal();
-    });
+    .modal-card{
+      width:min(64em, 96vw);
+      background:rgba(10,16,24,0.95);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:1em;
+      box-shadow:0 20px 60px rgba(0,0,0,0.55);
+      overflow:hidden;
+    }
 
-    document.addEventListener("keydown", (e) => {
-      if(e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
-    });
-  })();
-</script>
+    .modal-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:1em;
+      padding:1em 1.1em;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+    }
+    .modal-title{ font-weight:800; letter-spacing:0.02em; }
+    .modal-subtitle{ opacity:0.85; margin-top:0.2em; font-size:0.95em; }
 
+    .modal-close{
+      border:1px solid rgba(255,255,255,0.16);
+      background:rgba(255,255,255,0.06);
+      color:inherit;
+      border-radius:0.7em;
+      width:2.2em;
+      height:2.2em;
+      cursor:pointer;
+      line-height:1;
+      font-size:1.2em;
+    }
+    .modal-close:hover{ background:rgba(255,255,255,0.10); }
 
+    .modal-body{
+      padding:1em 1.1em 1.2em 1.1em;
+      overflow:auto;
+      max-height:78vh;
+    }
 
+    .ascii-diagram{
+      margin:0;
+      padding:0.9em 1em;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:0.8em;
+      white-space:pre;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:0.92em;
+      line-height:1.35;
+    }
+  </style>
 
-{% endblock %}
+  <script>
+    (function(){
+      const openBtn = document.getElementById("open-arch-diagram");
+      const modal = document.getElementById("arch-modal");
+      const closeBtn = document.getElementById("close-arch-modal");
+
+      function openModal(){
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden","false");
+      }
+      function closeModal(){
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden","true");
+      }
+
+      openBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        openModal();
+      });
+      closeBtn?.addEventListener("click", closeModal);
+
+      modal?.addEventListener("click", (e) => {
+        if(e.target === modal) closeModal();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+      });
+    })();
+  </script>
+
+  {% endblock %}

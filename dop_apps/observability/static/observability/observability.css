@@ -3,6 +3,23 @@ body{font-family:system-ui,Segoe UI,Arial;margin:0;background:#0b0f14;color:#e8e
 .brand{font-weight:700}
 .nav a{color:#cfe2ff;text-decoration:none;margin-left:12px}
 .nav a:hover{text-decoration:underline}
+
+/* Make ALL card links match the nav link color */
+a.link, a.link:visited{
+  color:#aeceff;
+  text-decoration:none;
+}
+a.link:hover{ text-decoration:underline; }
+
+a.link-monitor,
+a.link-monitor:visited{
+  color:#f4d462;
+}
+a.link-monitor:hover{
+  text-decoration: underline;
+}
+
+
 .container{max-width:1100px;margin:0 auto;padding:18px}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0 20px}
 .card{border:1px solid #1d2633;background:#0e141d;border-radius:10px;padding:12px}
@@ -13,3 +30,50 @@ body{font-family:system-ui,Segoe UI,Arial;margin:0;background:#0b0f14;color:#e8e
 .table th{opacity:.8}
 h1{margin:6px 0 12px}
 h2{margin:18px 0 10px}
+
+
+.overview-hero{
+  margin-top:0.8em;
+  border-radius:0.9em;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,0.10);
+  background:rgba(255,255,255,0.02);
+}
+.overview-hero img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+
+.overview-text{
+  max-width: 42em;   /* adjust: 48em, 54em, etc */
+  margin: 0 auto;    /* centers it */
+}
+.overview-text{ text-align: center; }
+
+
+.topbar{
+  width: 100%;
+}
+
+.topbar .nav{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 1.6em;   /* increase/decrease this */
+}
+
+
+.nav-left{
+  display:flex;
+  gap:1.2em;
+}
+
+.nav-right{
+  margin-left:auto;
+  display:flex;
+  gap:1.2em;
+  justify-content:flex-end;
+}
+
