@@ -1,4 +1,4 @@
-# Data Contracts (Minimal)
+# Data Contracts
 
 ## 1. Observation Contract
 An observation represents **one metric value** for **one station** at a **specific time**.
