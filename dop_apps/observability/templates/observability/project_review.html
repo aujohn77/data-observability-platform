@@ -1,9 +1,8 @@
-  {# templates/observability/project_review.html #}
-  {% extends "observability/base.html" %}
-  {% load static %}
+{# templates/observability/project_review.html #}
+{% extends "observability/base.html" %}
+{% load static %}
 
-  {% block content %}
-
+{% block content %}
 
 <section class="card">
   <h1 style="margin-top:0;">Data Observability Platform (Independent Project)</h1>
@@ -16,17 +15,17 @@
     >
   </div>
 
-<div class="overview-text">
-  <p style="margin:0.6em 0 0 0;">
-    This project is a production-style data observability platform. It ingests raw data, transforms it into 
-    a clean warehouse model, runs automated data-quality checks, and detects anomalies that open incidents. 
-    All dashboards read from secure database views, and access is enforced with Row-Level Security (RLS).
-  </p>
-</div>
+  <div class="overview-text">
+    <p style="margin:0.6em 0 0 0;">
+      This project is a production-style data observability platform. It ingests raw data, transforms it into
+      a clean warehouse model, runs automated data-quality checks, and detects anomalies that open incidents.
+      All dashboards read from secure database views, and access is enforced with Row-Level Security (RLS).
+    </p>
+  </div>
 </section>
 
-  <!-- 1 + 2 are INDEPENDENT sections side-by-side (WITH GAP) -->
-  <div class="pair-grid" style="margin-top:1.2em;">
+<!-- 1 + 2 are INDEPENDENT sections side-by-side (WITH GAP) -->
+<div class="pair-grid" style="margin-top:1.2em;">
   <section class="card pair-card">
     <h3 style="margin-top:0;">1. Architecture</h3>
     <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
@@ -34,7 +33,12 @@
     </div>
 
     <div style="margin-top:0.6em; line-height:1.9;">
-      • <a href="#" class="link" id="open-arch-diagram">Architecture Diagram</a>
+      • <a
+          href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/architecture_diagram.md"
+          class="link"
+          target="_blank"
+          rel="noopener"
+        >Architecture Diagram</a>
     </div>
   </section>
 
@@ -59,336 +63,147 @@
           target="_blank"
           rel="noopener"
         >Schema Documentation</a><br>
+
       • <a
           href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/views.md"
           class="link"
           target="_blank"
           rel="noopener"
         >Dashboard Views (SQL Definitions)</a>
-
     </div>
   </section>
+</div>
+
+<!-- 3 is ONE section with internal columns (NO GAP / no mini-cards) -->
+<section class="card" style="margin-top:1.2em;">
+  <h3 style="margin-top:0;">3. Row-Level Security (RLS)</h3>
+  <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+    Access rules enforced in the database and verified by CI tests.
   </div>
 
-  <!-- 3 is ONE section with internal columns (NO GAP / no mini-cards) -->
-  <section class="card" style="margin-top:1.2em;">
-    <h3 style="margin-top:0;">3. Row-Level Security (RLS)</h3>
-    <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
-      Access rules enforced in the database and verified by CI tests.
-    </div>
+  <div style="margin-top:0.6em;">
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <colgroup>
+        <col style="width:33.333%;">
+        <col style="width:33.333%;">
+        <col style="width:33.333%;">
+      </colgroup>
 
-    <div style="margin-top:0.6em;">
-      <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
-        <colgroup>
-          <col style="width:33.333%;">
-          <col style="width:33.333%;">
-          <col style="width:33.333%;">
-        </colgroup>
+      <tr>
+        <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">Policies</th>
+        <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">Verification Tests</th>
+        <th style="text-align:left; font-weight:700; padding:0.2em 0 0.4em 0;">Automation (CI)</th>
+      </tr>
 
-        <tr>
-          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
-            Policies
-          </th>
-          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
-            Verification Tests
-          </th>
-          <th style="text-align:left; font-weight:700; padding:0.2em 0 0.4em 0;">
-            Automation (CI)
-          </th>
-        </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+          • <a
+              href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/rls_policies.md"
+              class="link"
+              target="_blank"
+              rel="noopener"
+            >RLS Policies</a>
+        </td>
 
-        <tr style="vertical-align:top;">
-          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
-            • <a
-                href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/rls_policies.md"
-                class="link" target="_blank" rel="noopener"
-              >RLS Policies</a>
-          </td>
+        <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+          • <a
+              href="https://github.com/aujohn77/data-observability-platform/blob/main/db/tests/rls_security_verification_tests_ci.sql"
+              class="link"
+              target="_blank"
+              rel="noopener"
+            >RLS Verification Tests</a>
+        </td>
 
-          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
-            • <a
-                href="https://github.com/aujohn77/data-observability-platform/blob/main/db/tests/rls_security_verification_tests_ci.sql"
-                class="link" target="_blank" rel="noopener"
-              >RLS Verification Tests</a>
-          </td>
+        <td style="padding:0; line-height:1.9; word-break:break-word;">
+          • <a
+              href="https://github.com/aujohn77/data-observability-platform/blob/main/.github/workflows/security_rls_tests.yml"
+              class="link"
+              target="_blank"
+              rel="noopener"
+            >RLS Test Workflow</a><br>
 
-          <td style="padding:0; line-height:1.9; word-break:break-word;">
-            • <a
-                href="https://github.com/aujohn77/data-observability-platform/blob/main/.github/workflows/security_rls_tests.yml"
-                class="link" target="_blank" rel="noopener"
-              >RLS Test Workflow</a><br>
+          • <a
+              href="https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml"
+              class="link"
+              target="_blank"
+              rel="noopener"
+            >RLS Test Status</a> ☑
+        </td>
+      </tr>
+    </table>
+  </div>
+</section>
 
-            • <a
-                href="https://github.com/aujohn77/data-observability-platform/actions/workflows/security_rls_tests.yml"
-                class="link" target="_blank" rel="noopener"
-              >RLS Test Status</a> ☑
-          </td>
-        </tr>
-      </table>
-    </div>
-  </section>
-
-  <!-- 4 is ONE section with internal columns (NO GAP / no mini-cards) -->
-  <section class="card" style="margin-top:1.2em;">
-    <h3 style="margin-top:0;">4. Monitoring  &amp; Operations</h3>
-      <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
-      Dashboards, jobs, and automation for pipeline health and incidents.
-    </div>
-
-    <div style="margin-top:0.6em;">
-      <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
-        <colgroup>
-          <col style="width:33.333%;">
-          <col style="width:33.333%;">
-          <col style="width:33.333%;">
-        </colgroup>
-
-        <tr>
-          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
-            Live Dashboards
-          </th>
-          <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">
-            Jobs
-          </th>
-          <th style="text-align:left; font-weight:700; padding:0.2em 0 0.4em 0;">
-            Automation (CI)
-          </th>
-        </tr>
-
-        <tr style="vertical-align:top;">
-          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
-            • <a href="{% url 'observability:control_tower' %}" class="link link-monitor">Monitoring Dashboard</a><br>
-            • <a href="{% url 'observability:incidents' %}" class="link">Incidents</a><br>
-            • <a href="{% url 'observability:stations' %}" class="link">Stations</a>
-          </td>
-
-          <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
-            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/ingest.py" class="link" target="_blank">Data Ingestion</a><br>
-            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/transform_fact.py" class="link" target="_blank">Data Transformation</a><br>
-            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/run_dq.py" class="link" target="_blank">Data Quality Checks</a><br>
-            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/run_anomaly_detection.py" class="link" target="_blank">Anomaly &amp; Incident Handling</a>
-          </td>
-
-          <td style="padding:0; line-height:1.9; word-break:break-word;">
-            • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/.github/workflows/pipeline.yml" class="link" target="_blank">Jobs Workflow</a>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </section>
-
-  <section class="card" style="margin-top:1.2em;">
-    <h3 style="margin-top:0;">5. Data Contracts</h3>
-        <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
-          Expected data shape and validation rules for ingestion and transforms.
-        </div>
-    <div style="margin-top:0.6em;">
-      • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/data_contracts.md" class="link" target="_blank">Data Contract Specification</a>
-    </div>
-  </section>
-
-
-
-
-  <!-- Architecture Diagram Modal -->
-  <div class="modal-backdrop" id="arch-modal" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="arch-title">
-      <div class="modal-head">
-        <div>
-          <div id="arch-title" class="modal-title">Architecture Diagram</div>
-          <div class="modal-subtitle">End-to-end platform flow (raw → warehouse → ops)</div>
-        </div>
-        <button class="modal-close" id="close-arch-modal" aria-label="Close">×</button>
-      </div>
-
-      <div class="modal-body">
-        <pre class="ascii-diagram">
-  ┌──────────────────────────┐
-  │ External Data Sources    │
-  │ (Public Sensors / APIs)  │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ Ingestion Jobs           │
-  │ (Scheduled / CI-trigger) │
-  │ • incremental            │
-  │ • idempotent             │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ RAW LAYER (Database)     │
-  │ raw_observations         │
-  │ • append-only            │
-  │ • source payload stored  │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ TRANSFORM / MODEL        │
-  │ Jobs (CI / Workers)      │
-  │ • normalize              │
-  │ • deduplicate            │
-  │ • enforce contracts      │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ WAREHOUSE LAYER          │
-  │ fact_observation         │
-  │ dim_station              │
-  │ dim_metric               │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ OPS / OBSERVABILITY      │
-  │ ops_job_run              │
-  │ ops_dq_check_run         │
-  │ ops_anomaly              │
-  │ ops_incident             │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ APPLICATION / DASHBOARD  │
-  │ (Read-only views)        │
-  │ • Status                 │
-  │ • Incidents              │
-  │ • Stations               │
-  └─────────────┬────────────┘
-                │
-                ▼
-  ┌──────────────────────────┐
-  │ USERS                    │
-  │ • anon                   │
-  │ • analyst                │
-  │ • ops                    │
-  │ (RLS enforced in DB)     │
-  └──────────────────────────┘
-        </pre>
-      </div>
-    </div>
+<!-- 4 is ONE section with internal columns (NO GAP / no mini-cards) -->
+<section class="card" style="margin-top:1.2em;">
+  <h3 style="margin-top:0;">4. Monitoring &amp; Operations</h3>
+  <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+    Dashboards, jobs, and automation for pipeline health and incidents.
   </div>
 
-  <style>
-    /* Minimal button style (works even if your base CSS has none) */
-    .btn{
-      display:inline-block;
-      padding:0.45em 0.8em;
-      border:1px solid rgba(255,255,255,0.18);
-      border-radius:0.6em;
-      text-decoration:none;
-      color:inherit;
-      background:rgba(255,255,255,0.04);
-    }
-    .btn:hover{ background:rgba(255,255,255,0.08); }
+  <div style="margin-top:0.6em;">
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <colgroup>
+        <col style="width:33.333%;">
+        <col style="width:33.333%;">
+        <col style="width:33.333%;">
+      </colgroup>
 
-    /* 1 + 2 layout: two independent cards with a GAP (like Anomalies / Incidents) */
-    .pair-grid{
-      display:flex;
-      gap:1em;
-      flex-wrap:wrap;
-      align-items:stretch;
-    }
-    .pair-card{
-      flex:1 1 22em;
-    }
+      <tr>
+        <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">Live Dashboards</th>
+        <th style="text-align:left; font-weight:700; padding:0.2em 0.6em 0.4em 0;">Jobs</th>
+        <th style="text-align:left; font-weight:700; padding:0.2em 0 0.4em 0;">Automation (CI)</th>
+      </tr>
 
-    /* Modal (matches your dark card style) */
-    .modal-backdrop{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,0.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:2vh 2vw;
-      z-index:9999;
-    }
-    .modal-backdrop.is-open{ display:flex; }
+      <tr style="vertical-align:top;">
+        <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+          • <a href="{% url 'observability:control_tower' %}" class="link link-monitor">Monitoring Dashboard</a><br>
+          • <a href="{% url 'observability:incidents' %}" class="link">Incidents</a><br>
+          • <a href="{% url 'observability:stations' %}" class="link">Stations</a>
+        </td>
 
-    .modal-card{
-      width:min(64em, 96vw);
-      background:rgba(10,16,24,0.95);
-      border:1px solid rgba(255,255,255,0.12);
-      border-radius:1em;
-      box-shadow:0 20px 60px rgba(0,0,0,0.55);
-      overflow:hidden;
-    }
+        <td style="padding:0 0.6em 0 0; line-height:1.9; word-break:break-word;">
+          • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/ingest.py" class="link" target="_blank" rel="noopener">Data Ingestion</a><br>
+          • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/transform_fact.py" class="link" target="_blank" rel="noopener">Data Transformation</a><br>
+          • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/run_dq.py" class="link" target="_blank" rel="noopener">Data Quality Checks</a><br>
+          • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/jobs/run_anomaly_detection.py" class="link" target="_blank" rel="noopener">Anomaly &amp; Incident Handling</a>
+        </td>
 
-    .modal-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:1em;
-      padding:1em 1.1em;
-      border-bottom:1px solid rgba(255,255,255,0.10);
-    }
-    .modal-title{ font-weight:800; letter-spacing:0.02em; }
-    .modal-subtitle{ opacity:0.85; margin-top:0.2em; font-size:0.95em; }
+        <td style="padding:0; line-height:1.9; word-break:break-word;">
+          • <a href="https://github.com/aujohn77/data-observability-platform/blob/main/.github/workflows/pipeline.yml" class="link" target="_blank" rel="noopener">Jobs Workflow</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</section>
 
-    .modal-close{
-      border:1px solid rgba(255,255,255,0.16);
-      background:rgba(255,255,255,0.06);
-      color:inherit;
-      border-radius:0.7em;
-      width:2.2em;
-      height:2.2em;
-      cursor:pointer;
-      line-height:1;
-      font-size:1.2em;
-    }
-    .modal-close:hover{ background:rgba(255,255,255,0.10); }
+<section class="card" style="margin-top:1.2em;">
+  <h3 style="margin-top:0;">5. Data Contracts</h3>
+  <div style="opacity:.8; font-size:.95em; margin-top:.35em; line-height:1.4;">
+    Expected data shape and validation rules for ingestion and transforms.
+  </div>
 
-    .modal-body{
-      padding:1em 1.1em 1.2em 1.1em;
-      overflow:auto;
-      max-height:78vh;
-    }
+  <div style="margin-top:0.6em;">
+    • <a
+        href="https://github.com/aujohn77/data-observability-platform/blob/main/docs/data_contracts.md"
+        class="link"
+        target="_blank"
+        rel="noopener"
+      >Data Contract Specification</a>
+  </div>
+</section>
 
-    .ascii-diagram{
-      margin:0;
-      padding:0.9em 1em;
-      background:rgba(255,255,255,0.03);
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:0.8em;
-      white-space:pre;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:0.92em;
-      line-height:1.35;
-    }
-  </style>
+<style>
+  /* 1 + 2 layout: two independent cards with a GAP */
+  .pair-grid{
+    display:flex;
+    gap:1em;
+    flex-wrap:wrap;
+    align-items:stretch;
+  }
+  .pair-card{
+    flex:1 1 22em;
+  }
+</style>
 
-  <script>
-    (function(){
-      const openBtn = document.getElementById("open-arch-diagram");
-      const modal = document.getElementById("arch-modal");
-      const closeBtn = document.getElementById("close-arch-modal");
-
-      function openModal(){
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden","false");
-      }
-      function closeModal(){
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden","true");
-      }
-
-      openBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openModal();
-      });
-      closeBtn?.addEventListener("click", closeModal);
-
-      modal?.addEventListener("click", (e) => {
-        if(e.target === modal) closeModal();
-      });
-
-      document.addEventListener("keydown", (e) => {
-        if(e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
-      });
-    })();
-  </script>
-
-  {% endblock %}
+{% endblock %}
