@@ -51,46 +51,6 @@ def _q_cur(cur, sql, params=None, many=True):
     return cur.fetchall() if many else cur.fetchone()
 
 
-def status(request):
-    health = _q(
-        """
-        select last_success_at, failures_7d, anomalies_24h
-        from public.public_platform_health
-        order by last_success_at desc
-        limit 1
-        """,
-        many=False,
-    ) or {}
-
-    last_success_str = _to_utc_str(health.get("last_success_at"), "%Y-%m-%d %H:%M UTC")
-
-    runs = []
-    try:
-        runs = _q(
-            """
-                select job_name, started_at, ended_at, status
-                from public.vw_job_run_recent
-            """
-        )
-        for r in runs:
-            for k in ("started_at", "ended_at"):
-                if r.get(k):
-                    r[k] = _to_utc_str(r[k], "%H:%M")
-    except Exception:
-        runs = []
-
-    ctx = {
-        "title": "Platform Status",
-        "kpis": [
-            {"label": "Last success", "value": last_success_str},
-            {"label": "Failures (7d)", "value": health.get("failures_7d", 0)},
-            {"label": "Anomalies (24h)", "value": health.get("anomalies_24h", 0)},
-        ],
-        "runs": runs,
-    }
-    return render(request, "observability/status.html", ctx)
-
-
 def incidents(request):
     # NOTE: This pulls from the VIEW (safer) not the base table.
     items = _q(
@@ -155,45 +115,6 @@ def stations(request):
     return render(request, "observability/stations.html", ctx)
 
 
-def freshness(request):
-    points = _q(
-        """
-        select bucket, fresh_1h, stations_total
-        from public.public_freshness_hourly
-        order by bucket desc
-        limit 24
-        """
-    )
-
-    points = list(reversed(points))
-
-    series = []
-    for p in points:
-        total = p.get("stations_total") or 0
-        fresh = p.get("fresh_1h") or 0
-        pct = round((fresh / total) * 100) if total else 0
-        bucket = p.get("bucket")
-        label = _to_utc_str(bucket, "%m-%d %H:%M").replace(" UTC", "") if bucket else ""
-        series.append({"bucket": label, "pct": pct})
-
-    def avg_last(n):
-        if not series:
-            return 0
-        tail = series[-n:] if len(series) >= n else series
-        return round(sum(x["pct"] for x in tail) / len(tail)) if tail else 0
-
-    ctx = {
-        "title": "Freshness",
-        "series": [
-            {"bucket": "last 1h", "pct": avg_last(1)},
-            {"bucket": "last 6h", "pct": avg_last(6)},
-            {"bucket": "last 24h", "pct": avg_last(24)},
-        ],
-        "late_rate": "—",
-    }
-    return render(request, "observability/freshness.html", ctx)
-
-
 def control_tower(request):
     """
     Performance fixes:
@@ -214,7 +135,6 @@ def control_tower(request):
                 """,
                 many=False,
             ) or {}
-
 
             pipeline = _q_cur(
                 cur,
@@ -245,7 +165,7 @@ def control_tower(request):
                 """,
             ) or []
 
-            incidents = _q_cur(
+            incidents_kpis = _q_cur(
                 cur,
                 """
                 select
@@ -261,7 +181,7 @@ def control_tower(request):
     finally:
         conn.close()
 
-    # ✅ Force UTC display for pipeline & dq timestamps (so templates never auto-localize)
+    # Force UTC display for pipeline & dq timestamps (so templates never auto-localize)
     for r in pipeline:
         if r.get("last_run_at"):
             r["last_run_at"] = _to_utc_str(r["last_run_at"], "%Y-%m-%d %H:%M")
@@ -295,7 +215,7 @@ def control_tower(request):
         "title": "Control Tower",
         "status": {
             "status": status_text,
-            "dot_color": dot_color,  # ✅ NEW
+            "dot_color": dot_color,
             "last_ingest": fmt_dt(platform_status.get("last_ingest_at") or platform_status.get("last_ingest")),
             "window": platform_status.get("window") or "24h",
             "last_updated": fmt_dt(platform_status.get("as_of") or platform_status.get("last_updated_at")),
@@ -306,7 +226,7 @@ def control_tower(request):
         "pipeline": pipeline,
         "dq": dq,
         "anomalies": anomalies,
-        "incidents": incidents,
+        "incidents": incidents_kpis,
     }
 
     return render(request, "observability/control_tower.html", ctx)
@@ -315,7 +235,3 @@ def control_tower(request):
 def overview(request):
     ctx = {"title": ""}
     return render(request, "observability/project_review.html", ctx)
-
-
-def index(request):
-    return status(request)
