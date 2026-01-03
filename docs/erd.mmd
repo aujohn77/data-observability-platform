@@ -1,0 +1,205 @@
+erDiagram
+  %% NOTE:
+  %% Your paste cuts off before the FOREIGN KEY constraint section,
+  %% so the relationships below are based on PKs + obvious key columns (logical links).
+
+  %% =========================
+  %% Core app schema (public)
+  %% =========================
+
+  DIM_STATION {
+    bigint station_id PK
+    text source
+    text station_external_id
+    text station_name
+    text state
+    text region
+    numeric lat
+    numeric lon
+    timestamptz valid_from
+    timestamptz valid_to
+    boolean is_current
+    boolean is_smoketest
+  }
+
+  DIM_METRIC {
+    bigint metric_id PK
+    text metric_code "UNIQUE"
+    text unit_canonical
+    text value_type
+    numeric min_expected
+    numeric max_expected
+    boolean is_active
+  }
+
+  OPS_JOB_RUN {
+    uuid run_id PK
+    text job_name
+    text status
+    timestamptz started_at
+    timestamptz ended_at
+    timestamptz watermark_from
+    timestamptz watermark_to
+    integer rows_inserted
+    integer rows_updated
+    integer rows_deduped
+    text error_message
+    uuid parent_run_id
+  }
+
+  FACT_OBSERVATION {
+    bigint station_id PK
+    bigint metric_id PK
+    timestamptz observed_at PK
+    numeric value_num
+    text source
+    timestamptz ingested_at
+    boolean is_late
+    uuid ingest_run_id
+  }
+
+  RAW_OBSERVATIONS {
+    bigint id PK
+    text source
+    text station_external_id
+    timestamptz observed_at
+    text metric_code
+    numeric value_num
+    text value_text
+    text unit
+    text quality_flag
+    jsonb source_payload
+    timestamptz ingested_at
+    uuid ingest_run_id
+  }
+
+  OPS_ANOMALY_TYPE {
+    integer anomaly_type_id PK
+    text anomaly_type "UNIQUE"
+    text description
+    text default_severity
+    boolean is_enabled
+    timestamptz created_at
+  }
+
+  OPS_ANOMALY {
+    bigint anomaly_id PK
+    text anomaly_type
+    timestamptz detected_at
+    bigint station_id
+    bigint metric_id
+    text severity
+    jsonb details
+    integer metric_id_dedup "GENERATED"
+    timestamptz detected_hour
+  }
+
+  OPS_ANOMALY_DETECTOR_RUN {
+    bigint detector_run_id PK
+    uuid run_id
+    text detector_name
+    timestamptz started_at
+    timestamptz finished_at
+    integer duration_ms
+    integer rows_detected
+    integer rows_inserted
+    text status
+    text error_message
+  }
+
+  OPS_DQ_CHECK_DEFINITION {
+    integer dq_check_id PK
+    text check_name "UNIQUE"
+    text description
+    text category
+    text severity
+    text target_table
+    text target_grain
+    numeric threshold_value
+    text threshold_operator
+    text check_sql_template
+    boolean is_active
+    timestamptz created_at
+  }
+
+  OPS_DQ_CHECK_RUN {
+    bigint dq_run_id PK
+    uuid run_id
+    text check_name
+    text status
+    timestamptz evaluated_at
+    numeric metric_value
+    numeric threshold
+    jsonb details
+    integer dq_check_id
+  }
+
+  OPS_INCIDENT {
+    bigint incident_id PK
+    text status
+    timestamptz opened_at
+    timestamptz resolved_at
+    bigint anomaly_id
+    text owner
+    text notes
+    text anomaly_type
+    bigint station_id
+    bigint metric_id
+    text severity
+    timestamptz created_at
+    timestamptz acknowledged_at
+    timestamptz last_seen_at
+    text title
+    jsonb details
+  }
+
+  OPS_INCIDENT_ANOMALY {
+    bigint incident_id PK
+    bigint anomaly_id PK
+    timestamptz linked_at
+  }
+
+  AUTHZ_USER_ACCESS {
+    uuid user_id PK
+    text role
+    text region
+    bigint station_id
+    timestamptz created_at
+  }
+
+  %% =========================
+  %% Minimal external refs (auth)
+  %% =========================
+
+  AUTH_USERS {
+    uuid id PK
+    text email
+    text role
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  %% =========================
+  %% Relationships (logical)
+  %% =========================
+
+  DIM_STATION ||--o{ FACT_OBSERVATION : "station_id"
+  DIM_METRIC  ||--o{ FACT_OBSERVATION : "metric_id"
+  OPS_JOB_RUN  ||--o{ FACT_OBSERVATION : "ingest_run_id"
+
+  OPS_JOB_RUN  ||--o{ RAW_OBSERVATIONS : "ingest_run_id"
+
+  DIM_STATION ||--o{ OPS_ANOMALY : "station_id"
+  DIM_METRIC  ||--o{ OPS_ANOMALY : "metric_id"
+  OPS_ANOMALY_TYPE ||--o{ OPS_ANOMALY : "anomaly_type"
+
+  OPS_JOB_RUN ||--o{ OPS_ANOMALY_DETECTOR_RUN : "run_id"
+
+  OPS_DQ_CHECK_DEFINITION ||--o{ OPS_DQ_CHECK_RUN : "dq_check_id"
+  OPS_JOB_RUN             ||--o{ OPS_DQ_CHECK_RUN : "run_id"
+
+  OPS_INCIDENT ||--o{ OPS_INCIDENT_ANOMALY : "incident_id"
+  OPS_ANOMALY  ||--o{ OPS_INCIDENT_ANOMALY : "anomaly_id"
+
+  AUTH_USERS ||--o{ AUTHZ_USER_ACCESS : "user_id"
+  DIM_STATION ||--o{ AUTHZ_USER_ACCESS : "station_id"

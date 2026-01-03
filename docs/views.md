@@ -16,7 +16,6 @@ All dashboards query **read-only views** (semantic layer) instead of hitting raw
 - `public_station_freshness` — last observed timestamp + freshness minutes by station/metric  
 
 ### Source of truth (SQL)
-- Folder: [`sql/views/`](../sql/views/)
 - View definitions:
   - [`vw_platform_status.sql`](../sql/views/vw_platform_status.sql)
   - [`vw_pipeline_health.sql`](../sql/views/vw_pipeline_health.sql)
