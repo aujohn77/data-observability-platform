@@ -68,10 +68,8 @@ def status(request):
     try:
         runs = _q(
             """
-            select job_name, started_at, ended_at, status
-            from public.ops_job_run
-            order by started_at desc
-            limit 10
+                select job_name, started_at, ended_at, status
+                from public.vw_job_run_recent
             """
         )
         for r in runs:
