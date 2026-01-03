@@ -294,3 +294,9 @@ h2{margin:1.125rem 0 0.625rem}                /* 18px 0 10px */
   /* Prevent title line from feeling huge on tiny screens */
   .ct-title{ font-size:0.95rem; }
 }
+
+
+
+.info-btn{ position:relative; z-index:5; pointer-events:auto; }
+.modal-backdrop{ z-index:1000; }
+.modal{ z-index:1001; }

@@ -131,153 +131,101 @@
 
 
 <script>
-  (function () {
-    const btn = document.getElementById("anomalyInfoBtn");
-    const modal = document.getElementById("anomalyModal");
-    const backdrop = document.getElementById("anomalyBackdrop");
-    const closeBtn = document.getElementById("anomalyCloseBtn");
+(() => {
+  function openModal(modal, backdrop, btn) {
+    modal.classList.add("is-open");
+    backdrop.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    backdrop.setAttribute("aria-hidden", "false");
 
-    let lastFocused = null;
+    // focus close button if present
+    const closeBtn = modal.querySelector(".modal-close");
+    if (closeBtn) closeBtn.focus();
 
-    function openModal() {
-      lastFocused = document.activeElement;
+    // remember last focused for restore
+    modal.__lastFocused = btn || document.activeElement;
+  }
 
-      modal.classList.add("is-open");
-      backdrop.classList.add("is-open");
+  function closeModal(modal, backdrop) {
+    if (!modal || !backdrop) return;
 
-      modal.setAttribute("aria-hidden", "false");
-      backdrop.setAttribute("aria-hidden", "false");
+    modal.classList.remove("is-open");
+    backdrop.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    backdrop.setAttribute("aria-hidden", "true");
 
-      // Focus close button for keyboard users
-      closeBtn.focus();
-      document.addEventListener("keydown", onKeyDown);
-    }
+    const last = modal.__lastFocused;
+    if (last && typeof last.focus === "function") last.focus();
+  }
 
-    function closeModal() {
-      modal.classList.remove("is-open");
-      backdrop.classList.remove("is-open");
+  function findBackdropForModalId(modalId) {
+    // statusModal -> statusBackdrop, dqModal -> dqBackdrop, etc.
+    return document.getElementById(modalId.replace(/Modal$/, "Backdrop"));
+  }
 
-      modal.setAttribute("aria-hidden", "true");
-      backdrop.setAttribute("aria-hidden", "true");
+  function findModalForBackdropId(backdropId) {
+    // statusBackdrop -> statusModal
+    return document.getElementById(backdropId.replace(/Backdrop$/, "Modal"));
+  }
 
-      document.removeEventListener("keydown", onKeyDown);
+  // CAPTURE PHASE so nothing else can block the click before we see it
+  document.addEventListener("click", (e) => {
+    // 1) Open: any info button with aria-controls
+    const infoBtn = e.target.closest("button.info-btn[aria-controls]");
+    if (infoBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
 
-      if (lastFocused && typeof lastFocused.focus === "function") {
-        lastFocused.focus();
+      const modalId = infoBtn.getAttribute("aria-controls");
+      const modal = document.getElementById(modalId);
+      const backdrop = findBackdropForModalId(modalId);
+
+      if (!modal || !backdrop) {
+        console.warn("Modal wiring missing:", { modalId, modal, backdrop });
+        return;
       }
+
+      openModal(modal, backdrop, infoBtn);
+      return;
     }
 
-    function onKeyDown(e) {
-      if (e.key === "Escape") closeModal();
+    // 2) Close: clicking the X button
+    const closeBtn = e.target.closest(".modal-close");
+    if (closeBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+      const modal = closeBtn.closest(".modal");
+      const backdrop = modal ? findBackdropForModalId(modal.id) : null;
+      closeModal(modal, backdrop);
+      return;
     }
 
-    if (btn) btn.addEventListener("click", openModal);
-    if (closeBtn) closeBtn.addEventListener("click", closeModal);
-    if (backdrop) backdrop.addEventListener("click", closeModal);
-  })();
+    // 3) Close: clicking the backdrop itself
+    const backdrop = e.target.classList && e.target.classList.contains("modal-backdrop") ? e.target : null;
+    if (backdrop) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
 
-
-
-  // -----------------------------
-  // PIPELINE HEALTH MODAL
-  // -----------------------------
-  const pBtn = document.getElementById("pipelineInfoBtn");
-  const pModal = document.getElementById("pipelineModal");
-  const pBackdrop = document.getElementById("pipelineBackdrop");
-  const pClose = document.getElementById("pipelineCloseBtn");
-
-  if (pBtn && pModal && pBackdrop && pClose) {
-    pBtn.addEventListener("click", () => {
-      pModal.classList.add("is-open");
-      pBackdrop.classList.add("is-open");
-      pModal.setAttribute("aria-hidden", "false");
-      pBackdrop.setAttribute("aria-hidden", "false");
-      pClose.focus();
-    });
-
-    function closePipeline() {
-      pModal.classList.remove("is-open");
-      pBackdrop.classList.remove("is-open");
-      pModal.setAttribute("aria-hidden", "true");
-      pBackdrop.setAttribute("aria-hidden", "true");
+      const modal = findModalForBackdropId(backdrop.id);
+      closeModal(modal, backdrop);
     }
+  }, true);
 
-    pClose.addEventListener("click", closePipeline);
-    pBackdrop.addEventListener("click", closePipeline);
-  }
+  // Escape closes any open modal
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
 
+    const openModalEl = document.querySelector(".modal.is-open");
+    if (!openModalEl) return;
 
-
-  // -----------------------------
-  // DATA QUALITY MODAL
-  // -----------------------------
-  const dqBtn = document.getElementById("dqInfoBtn");
-  const dqModal = document.getElementById("dqModal");
-  const dqBackdrop = document.getElementById("dqBackdrop");
-  const dqClose = document.getElementById("dqCloseBtn");
-
-  if (dqBtn && dqModal && dqBackdrop && dqClose) {
-    dqBtn.addEventListener("click", () => {
-      dqModal.classList.add("is-open");
-      dqBackdrop.classList.add("is-open");
-      dqModal.setAttribute("aria-hidden", "false");
-      dqBackdrop.setAttribute("aria-hidden", "false");
-      dqClose.focus();
-    });
-
-    function closeDQ() {
-      dqModal.classList.remove("is-open");
-      dqBackdrop.classList.remove("is-open");
-      dqModal.setAttribute("aria-hidden", "true");
-      dqBackdrop.setAttribute("aria-hidden", "true");
-    }
-
-    dqClose.addEventListener("click", closeDQ);
-    dqBackdrop.addEventListener("click", closeDQ);
-  }
-
-
-
-
-
-
-
-  // -----------------------------
-  // STATUS + KPI DEFINITIONS MODAL
-  // -----------------------------
-  const sBtn = document.getElementById("statusInfoBtn");
-  const sModal = document.getElementById("statusModal");
-  const sBackdrop = document.getElementById("statusBackdrop");
-  const sClose = document.getElementById("statusCloseBtn");
-
-  if (sBtn && sModal && sBackdrop && sClose) {
-    sBtn.addEventListener("click", () => {
-      sModal.classList.add("is-open");
-      sBackdrop.classList.add("is-open");
-      sModal.setAttribute("aria-hidden", "false");
-      sBackdrop.setAttribute("aria-hidden", "false");
-      sClose.focus();
-    });
-
-    function closeStatus() {
-      sModal.classList.remove("is-open");
-      sBackdrop.classList.remove("is-open");
-      sModal.setAttribute("aria-hidden", "true");
-      sBackdrop.setAttribute("aria-hidden", "true");
-    }
-
-    sClose.addEventListener("click", closeStatus);
-    sBackdrop.addEventListener("click", closeStatus);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeStatus();
-    });
-  }
-
-
-
-
-
-
+    const backdrop = findBackdropForModalId(openModalEl.id);
+    closeModal(openModalEl, backdrop);
+  });
+})();
 </script>
 
 
