@@ -166,3 +166,131 @@ h2{margin:1.125rem 0 0.625rem}                /* 18px 0 10px */
   /* Slightly tighter cards */
   .card{padding:0.6875rem} /* 11px-ish, keeps feel similar */
 }
+
+
+/* =========================
+   Control Tower layout helpers
+   ========================= */
+
+.ct-header{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+.ct-title-row{
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  flex-wrap:wrap;
+}
+
+.ct-title{
+  line-height:1.35;
+}
+
+.ct-meta{
+  margin-top:0.75rem;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  flex-wrap:wrap;
+}
+
+.ct-sep{ opacity:0.7; }
+
+.status-dot{
+  display:inline-block;
+  width:0.7rem;
+  height:0.7rem;
+  border-radius:50%;
+  margin:0 0.35rem 0 0.15rem;
+  vertical-align:middle;
+}
+
+/* Button: bigger tap target on mobile */
+.info-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:2rem;
+  height:2rem;
+  padding:0;
+  border-radius:999rem;
+  border:0.0625rem solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.06);
+  color:#cfe2ff;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+}
+.info-btn:hover{ text-decoration:none; }
+
+/* Grid helpers */
+.grid{
+  display:grid;
+  gap:1rem;
+  margin-top:1rem;
+}
+.grid-1{ grid-template-columns:1fr; }
+.grid-2{ grid-template-columns:1fr 1fr; }
+
+.card-title{
+  margin-top:0;
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  flex-wrap:wrap;
+}
+
+/* Tables: always safe on mobile */
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  border:0.0625rem solid #1d2633;
+  background:#0e141d;
+  border-radius:0.625rem;
+  overflow:hidden;
+  table-layout:auto; /* better on narrow screens */
+  min-width:34rem;   /* forces scroll instead of crushing columns */
+}
+
+.table th,.table td{
+  padding:0.625rem;
+  border-bottom:0.0625rem solid #1d2633;
+  text-align:left;
+  font-size:0.875rem;
+  vertical-align:top;
+}
+
+.nowrap{ white-space:nowrap; }
+
+/* Slightly nicer key/value lines */
+.kv{ margin-top:0.25rem; }
+
+/* =========================
+   Mobile optimizations
+   ========================= */
+@media (max-width:40rem){
+
+  /* Your existing nav mobile rules can stay as-is */
+
+  /* Collapse 2-col grid to 1-col */
+  .grid-2{ grid-template-columns:1fr; }
+
+  /* Reduce table min width so it fits more often */
+  .table{ min-width:28rem; }
+
+  /* Slightly tighter table padding */
+  .table th,.table td{ padding:0.5rem; }
+
+  /* Prevent title line from feeling huge on tiny screens */
+  .ct-title{ font-size:0.95rem; }
+}
