@@ -54,6 +54,8 @@ Run in Supabase SQL Editor (in this order):
 4. `db/seed_dq_check_definitions.sql` — seeds DQ checks (`ops_dq_check_definition`)
 5. `db/seed_anomaly_types.sql` — seeds anomaly taxonomy (`ops_anomaly_type`)
 
+
+Last updated on Feb 26, 2026
 ### Seeded reference tables (truth)
 - `dim_metric`: canonical metrics (codes, units, expected ranges)
 - `ops_dq_check_definition`: data quality checks, default thresholds, severity
