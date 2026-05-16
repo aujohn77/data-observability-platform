@@ -9,7 +9,7 @@ Production-style platform for ingesting time-series data, modeling it into analy
 
 ## Security proof
 RLS is enforced in Postgres and verified by CI on every run:
-- **Top-10 RLS checks**: [docs/security.md](docs/security.md)
+- **Top-10 RLS checks**: [docs/rls_policies.md](docs/rls_policies.md)
 - **Test SQL**: `db/tests/security_rls_smoke.sql`
 - **CI workflow**: `.github/workflows/security_rls_tests.yml`
 
@@ -34,7 +34,7 @@ RLS is enforced in Postgres and verified by CI on every run:
 - Optional monthly backfill workflow
 
 ## Project Documentation
-- Project spec: [docs/project_spec.md](docs/project_spec.md)
+- Project spec: [docs/schema.md](docs/schema.md)
 - Data contracts: [docs/data_contracts.md](docs/data_contracts.md)
 - Current stage: Stage 2 — Data contracts & semantics
 
