@@ -9,8 +9,23 @@ from psycopg2.extras import RealDictCursor
 
 
 # load only the observability .env (NOT fx/.env)
-OBS_ENV = Path(__file__).resolve().parents[2] / "jobs" / ".env"
-load_dotenv(dotenv_path=OBS_ENV, override=False)
+from django.conf import settings
+
+CANDIDATES = [
+    # 1) submodule repo location (if you later add jobs/.env there)
+    Path(__file__).resolve().parents[2] / "jobs" / ".env",
+
+    # 2) fx project root jobs/.env (if you ever add it)
+    Path(getattr(settings, "BASE_DIR", Path.cwd())) / "jobs" / ".env",
+
+    # 3) your standalone observability repo (YOUR CURRENT REAL ONE)
+    Path(r"C:\django\observability\data-observability-platform\jobs\.env"),
+]
+
+for p in CANDIDATES:
+    if p.exists():
+        load_dotenv(dotenv_path=p, override=False)
+        break
 
 
 def _get_obs_db_url():
